@@ -407,9 +407,9 @@ ARROW_DATA.add([
     motion: { trigger: '호버·포커스', change: 'color, background-color, border-color, box-shadow', timing: '.15s ease-in-out', inferred: false },
     feel: ['클래식', '붙은 셀', 'CMS'], fits: ['클래식 웹', 'CMS'],
     demo: `<nav class="B-17" aria-label="페이지네이션" data-behavior="pager" data-total="4" data-start="1">
-  <button type="button" data-prev aria-label="이전"><span aria-hidden="true">&laquo;</span></button>
+  <button type="button" data-prev aria-label="이전"><span class="g" aria-hidden="true">&laquo;</span></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음"><span aria-hidden="true">&raquo;</span></button>
+  <button type="button" data-next aria-label="다음"><span class="g" aria-hidden="true">&raquo;</span></button>
 </nav>`,
     css: `.B-17 { display: flex; align-items: center; font-size: var(--text-16); color: var(--fg-1); }
 .B-17 [data-pages] { display: contents; }
@@ -419,7 +419,11 @@ ARROW_DATA.add([
 .B-17 button:hover { background: color-mix(in srgb, var(--fg-1) 6%, var(--bg-1)); }
 .B-17 button[aria-current] { z-index: 3; color: var(--bg-1); background: var(--fg-1); border-color: var(--fg-1); }
 .B-17 button:focus-visible { z-index: 3; outline: 0; box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--fg-1) 25%, transparent); }
-.B-17 button:disabled { color: var(--fg-3); background: var(--bg-2); cursor: default; }`
+.B-17 button:disabled { color: var(--fg-3); background: var(--bg-2); cursor: default; }
+/* 광학 보정: « » 글리프 잉크 폭 ≈ .6em, 1/6 ≈ .1em 만큼 가리키는 쪽으로 (span 만 움직여 셀 테두리는 그대로) */
+.B-17 .g { display: inline-block; }
+.B-17 [data-prev] .g { translate: calc(var(--optical, 1) * -0.1em) 0; }
+.B-17 [data-next] .g { translate: calc(var(--optical, 1) * 0.1em) 0; }`
   },
   {
     id: 'B-18', group: 'CSS 프레임워크',
@@ -482,9 +486,9 @@ ARROW_DATA.add([
     feel: ['장난기', '테마형', '눌림 0.5px'], fits: ['테마 바꾸는 UI', '장난기 있는 서비스'],
     demo: `<nav class="B-20" aria-label="페이지">
   <div class="join" data-behavior="pager" data-labels="페이지 21,페이지 22,페이지 23,페이지 24" data-start="1">
-    <button type="button" data-prev aria-label="이전 페이지">&laquo;</button>
+    <button type="button" data-prev aria-label="이전 페이지"><span class="g">&laquo;</span></button>
     <span class="mid" data-label></span>
-    <button type="button" data-next aria-label="다음 페이지">&raquo;</button>
+    <button type="button" data-next aria-label="다음 페이지"><span class="g">&raquo;</span></button>
   </div>
   <div class="two" data-behavior="pager" data-total="4" data-start="1">
     <button type="button" data-prev>이전 페이지</button>
@@ -504,7 +508,11 @@ ARROW_DATA.add([
 .B-20 button:hover { background: color-mix(in srgb, var(--fg-1) 8%, var(--bg-1)); }
 .B-20 button:active { translate: 0 .5px; box-shadow: none; }
 .B-20 button:focus-visible { outline: 2px solid var(--fg-1); outline-offset: 2px; }
-.B-20 button:disabled { opacity: .4; cursor: default; box-shadow: none; }`
+.B-20 button:disabled { opacity: .4; cursor: default; box-shadow: none; }
+/* 광학 보정: « » 글리프 잉크 폭 ≈ .6em, 1/6 ≈ .1em 만큼 가리키는 쪽으로 */
+.B-20 .g { display: inline-block; }
+.B-20 .join [data-prev] .g { translate: calc(var(--optical, 1) * -0.1em) 0; }
+.B-20 .join [data-next] .g { translate: calc(var(--optical, 1) * 0.1em) 0; }`
   },
   {
     id: 'B-21', group: 'CSS 프레임워크',

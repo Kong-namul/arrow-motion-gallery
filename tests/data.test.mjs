@@ -163,6 +163,60 @@ test('[S] 세트 CSS 셀렉터는 모두 .T## 또는 .mb 범위 안', () => {
   for (const t of S.TYPES) assertScoped(t.key, t.css, scoped, `.${t.key} 또는 .mb`);
 });
 
+test('[S] 호버 스타일 6개 — 스키마·근거 링크·DS 토큰·선언된 --m-* 만', () => {
+  assert.ok(Array.isArray(S.STYLES), 'S.STYLES 배열');
+  assert.equal(S.STYLES.length, 6, `호버 스타일 6개 (지금 ${S.STYLES.length})`);
+  const names = new Set(S.VARS.map((v) => v.name));
+  const ids = new Set(D.ARROWS.map((a) => a.id));
+  const seen = new Set();
+  for (const h of S.STYLES) {
+    for (const f of ['key', 'cls', 'name', 'desc', 'css']) assert.ok(typeof h[f] === 'string' && h[f].trim(), `${h.key}.${f} 비어 있음`);
+    assert.match(h.key, /^H\d$/, `${h.key}: 키는 H숫자`);
+    assert.match(h.cls, /^hs-[a-z]+$/, `${h.key}: 클래스는 hs-이름`);
+    assert.ok(!seen.has(h.key) && !seen.has(h.cls), `${h.key}/${h.cls} 중복`);
+    seen.add(h.key); seen.add(h.cls);
+    assert.ok(Array.isArray(h.basis) && h.basis.length, `${h.key}.basis 배열`);
+    for (const b of h.basis) {
+      assert.ok(b.label && b.label.trim(), `${h.key}: 근거 label`);
+      if (b.href && b.href[0] === '#') assert.ok(ids.has(b.href.slice(1)), `${h.key}: 근거 ${b.href} 카드 없음`);
+      else if (b.href) assert.match(b.href, /^https:\/\//, `${h.key}: 근거 href`);
+    }
+    for (const m of h.css.matchAll(/var\((--m-[a-z0-9-]+)/g)) assert.ok(names.has(m[1]), `${h.key}: 미선언 ${m[1]}`);
+    colorRules(h.key, h.css);
+  }
+});
+
+test('[S] 스타일 CSS 셀렉터는 모두 제 .hs-* 와 .mb/.T## 를 함께 포함 (@property 제외)', () => {
+  for (const h of S.STYLES) {
+    const own = new RegExp(`\\.${h.cls}(?![\\w-])`);
+    assertScoped(h.key, h.css, (part) => own.test(part) && /\.(T\d{2}|mb)(?![\w])/.test(part), `.${h.cls} 와 .mb 또는 .T##`);
+  }
+});
+
+test('[S] 화살표 밀림(--m-nudge*)은 밀림 스타일(hs-nudge)에만', () => {
+  const nudge = S.STYLES.filter((h) => h.cls === 'hs-nudge');
+  assert.equal(nudge.length, 1, 'hs-nudge 스타일 1개');
+  assert.match(nudge[0].css, /var\(--m-nudge\)/, 'hs-nudge 가 --m-nudge 를 쓴다');
+  for (const t of [{ key: 'BASE', css: S.BASE }, ...S.TYPES, ...S.STYLES.filter((h) => h.cls !== 'hs-nudge')]) {
+    assert.doesNotMatch(t.css.replace(/\/\*[\s\S]*?\*\//g, ''), /var\(--m-nudge/, `${t.key}: 밀림은 hs-nudge 에서만`);
+  }
+});
+
+test('[S] 조합 복사 코드 = 타이밍 변수 + BASE + 스타일 + TYPES + 스타일 클래스로 감싼 마크업 + 동작', () => {
+  const set = S.SETS[1];
+  for (const h of S.STYLES) {
+    const code = D.setCode(S, set, B, h);
+    const at = (s) => code.indexOf(s);
+    for (const v of S.VARS) assert.ok(code.includes(`${v.name}: ${set.vars[v.name]};`), `${h.key}: ${v.name} 없음`);
+    assert.ok(at(S.BASE.trim()) > 0, `${h.key}: BASE 없음`);
+    assert.ok(at(h.css.trim()) > at(S.BASE.trim()), `${h.key}: 스타일 CSS 가 BASE 뒤에 없음`);
+    for (const t of S.TYPES) assert.ok(at(t.css.trim()) > at(h.css.trim()), `${h.key}: ${t.key} CSS 가 스타일 뒤에 없음`);
+    assert.ok(code.includes(`<div class="${h.cls}">`), `${h.key}: 마크업을 .${h.cls} 로 감싸지 않음`);
+    for (const o of S.STYLES.filter((x) => x !== h)) assert.ok(!code.includes(o.css.trim()), `${h.key}: 다른 스타일 ${o.key} CSS 가 섞임`);
+    assert.match(code, /<script>[\s\S]*function hold/, `${h.key}: 동작 JS 없음`);
+  }
+});
+
 test('[JS] 복사용 동작 코드가 빈 페이지에서 독립 실행된다', () => {
   const names = Object.keys(B);
   assert.equal(names.length, 14, `동작 14개 (지금 ${names.length})`);

@@ -5,7 +5,7 @@
 
   /* 카테고리 전용 아이콘: App Store 슬림 패들용 가늘고 긴 셰브론 (24×24, stroke) */
   D.addIcons({
-    'a-slim-l': D.svg('<path d="M15 2l-6 10 6 10" stroke-width="1.5"/>')
+    'a-slim-l': D.svg('<path d="M15 2l-6 10 6 10" stroke-width="1.5"/>', -1)
   });
 
   /* 슬라이드 n장 (사진 대신 진한 면 + 번호) */
@@ -19,6 +19,8 @@
     return '<button type="button" class="bt pv" data-prev aria-label="' + (pl || '이전 슬라이드') + '">' + l + '</button>' +
       '<button type="button" class="bt nx" data-next aria-label="' + (nl || '다음 슬라이드') + '">' + r + '</button>';
   }
+  /* 광학 보정용 글리프 래퍼: translate 는 inline 요소에 안 먹어서 inline-block 으로 둔다(CSS 쪽 .g). 버튼 배경·알약은 움직이지 않는다 */
+  function gl(c) { return '<span class="g">' + c + '</span>'; }
   var CL = '{{i:chev-l}}', CR = '{{i:chev-r}}';
 
   /* 모든 카드가 공유하는 뼈대 CSS (뷰포트·트랙·슬라이드·버튼 리셋). 카드마다 자기 번호로 범위 지정 */
@@ -152,13 +154,17 @@
       states: '호버 배경 #869791 (여기선 var(--fg-3)). 비활성 opacity .5',
       motion: { trigger: '호버', change: '배경색 교체 (전환 없이 즉시)', timing: '전환 없음(즉시)', inferred: false },
       feel: ['작음', '무게감 낮음', '아래 배치'], fits: ['단순 콘텐츠 행'], tall: false,
-      demo: `<div class="A-07" data-behavior="carousel"><div class="vp"><div data-track>${sl(4)}</div></div><div class="nav">${pn('‹', '›', '이전', '다음')}</div></div>`,
+      demo: `<div class="A-07" data-behavior="carousel"><div class="vp"><div data-track>${sl(4)}</div></div><div class="nav">${pn(gl('‹'), gl('›'), '이전', '다음')}</div></div>`,
       css: base('A-07') +
         `.A-07 .vp { inset: 0 0 44px; }
 .A-07 .nav { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
 .A-07 .bt { padding: 4px 7px; border-radius: 3px; font-size: var(--text-14); line-height: 1; background: var(--border-strong); color: var(--bg-1); }
 .A-07 .bt:hover:not(:disabled) { background: var(--fg-3); }
-.A-07 .bt:disabled { opacity: .5; }`
+.A-07 .bt:disabled { opacity: .5; }
+/* 광학 보정: ‹ › 글리프 잉크 폭 ≈ .3em, 1/6 ≈ .05em 만큼 가리키는 쪽으로 (빈 쪽이 가볍게 보이는 것 상쇄) */
+.A-07 .g { display: inline-block; }
+.A-07 .pv .g { translate: calc(var(--optical, 1) * -0.05em) 0; }
+.A-07 .nx .g { translate: calc(var(--optical, 1) * 0.05em) 0; }`
     },
     {
       id: 'A-08', group: '캐러셀 라이브러리', name: 'Glider.js 맨 글리프', source: 'Glider.js 1.7.9',
@@ -167,14 +173,18 @@
       states: '호버/포커스 색 #a89cc8(라벤더) → 여기선 var(--fg-1). 비활성 opacity .25',
       motion: { trigger: '호버/포커스', change: '글리프 색 천천히 변화, 비활성은 불투명도 .25', timing: 'opacity .5s, color .5s cubic-bezier(.17,.67,.83,.67)', inferred: false },
       feel: ['느리고 부드러운', '타이포그래피', '에디토리얼'], fits: ['에디토리얼/타이포 중심 레이아웃'], tall: false,
-      demo: `<div class="A-08" data-behavior="carousel"><div class="vp"><div data-track>${sl(4)}</div></div>${pn('«', '»')}</div>`,
+      demo: `<div class="A-08" data-behavior="carousel"><div class="vp"><div data-track>${sl(4)}</div></div>${pn(gl('«'), gl('»'))}</div>`,
       css: base('A-08') +
         `.A-08 .vp { inset: 0 44px; }
 .A-08 .bt { position: absolute; top: 30%; width: 40px; height: 40px; font-size: var(--text-36); line-height: 1; color: var(--fg-3); transition: opacity .5s, color .5s cubic-bezier(.17,.67,.83,.67); }
 .A-08 .pv { left: 2px; }
 .A-08 .nx { right: 2px; }
 .A-08 .bt:hover:not(:disabled), .A-08 .bt:focus-visible { color: var(--fg-1); }
-.A-08 .bt:disabled { opacity: .25; }`
+.A-08 .bt:disabled { opacity: .25; }
+/* 광학 보정: « » 글리프 잉크 폭 ≈ .6em, 1/6 ≈ .1em 만큼 가리키는 쪽으로 */
+.A-08 .g { display: inline-block; }
+.A-08 .pv .g { translate: calc(var(--optical, 1) * -0.1em) 0; }
+.A-08 .nx .g { translate: calc(var(--optical, 1) * 0.1em) 0; }`
     },
     {
       id: 'A-09', group: '캐러셀 라이브러리', name: 'Keen-slider 굵은 셰브론', source: 'Keen-slider 6',
@@ -303,13 +313,17 @@
       states: '호버 시 배경 7% 어둡게. 누르면 translate:0 .5px + 그림자 제거. focus-visible 2px 아웃라인. 비활성은 글자 20%, 투명',
       motion: { trigger: '호버/누름', change: '배경 7% 어둡게, 누르면 0.5px 내려가며 그림자 제거', timing: 'color, background, border, shadow, transform 0.2s cubic-bezier(0,0,.2,1)', inferred: false },
       feel: ['CSS만으로', '링크 방식', '살짝 눌림'], fits: ['JS 없는 CSS 전용 캐러셀'], tall: false,
-      demo: `<div class="A-16" data-behavior="carousel" data-loop><div class="vp"><div data-track>${sl(4)}</div></div><div class="nav">${pn('❮', '❯')}</div></div>`,
+      demo: `<div class="A-16" data-behavior="carousel" data-loop><div class="vp"><div data-track>${sl(4)}</div></div><div class="nav">${pn(gl('❮'), gl('❯'))}</div></div>`,
       css: base('A-16') +
         `.A-16 .nav { position: absolute; left: 20px; right: 20px; top: 50%; display: flex; justify-content: space-between; transform: translateY(-50%); pointer-events: none; }
 .A-16 .bt { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-2); color: var(--fg-1); box-shadow: var(--shadow-sm); pointer-events: auto; transition-property: color, background-color, border-color, box-shadow, translate; transition-duration: 0.2s; transition-timing-function: cubic-bezier(0,0,.2,1); }
 .A-16 .bt:hover { background: color-mix(in srgb, var(--bg-2) 93%, var(--fg-1)); }
 .A-16 .bt:active { translate: 0 .5px; box-shadow: none; }
-.A-16 .bt:focus-visible { outline: 2px solid var(--fg-1); outline-offset: 2px; }`
+.A-16 .bt:focus-visible { outline: 2px solid var(--fg-1); outline-offset: 2px; }
+/* 광학 보정: ❮ ❯ 굵은 꺾쇠 잉크 폭 ≈ .4em, 1/6 ≈ .07em 만큼 가리키는 쪽으로. 버튼의 :active translate 와 겹치지 않게 글리프 span 에만 */
+.A-16 .g { display: inline-block; }
+.A-16 .pv .g { translate: calc(var(--optical, 1) * -0.07em) 0; }
+.A-16 .nx .g { translate: calc(var(--optical, 1) * 0.07em) 0; }`
     },
     {
       id: 'A-17', group: 'UI 프레임워크·디자인 시스템', name: 'shadcn/ui 바깥 아웃라인 원', source: 'shadcn/ui',

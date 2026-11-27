@@ -6,7 +6,7 @@
 
 **Architecture:** 데이터 SSOT(`data/*.js`, 브라우저 전역 스크립트) → 갤러리 렌더러(`assets/gallery.js`)와 MD 생성기(`scripts/build-md.mjs`)가 같은 데이터를 읽는다. 데모 동작은 복사 가능한 독립 함수(`assets/behaviors.js`). 세트는 `--m-*` CSS 변수 묶음이고 버튼 CSS는 그 변수만 참조한다.
 
-**Tech Stack:** 순수 HTML/CSS/JS (빌드 없음, file:// 로도 열림), Node 25 `node:test` + `node:vm`(데이터 검증·MD 생성), PARAMETA DS 토큰.
+**Tech Stack:** 순수 HTML/CSS/JS (빌드 없음, file:// 로도 열림), Node 25 `node:test` + `node:vm`(데이터 검증·MD 생성), 도감 전용 토큰(`assets/tokens.css`).
 
 ## Global Constraints
 
@@ -25,7 +25,7 @@
 | 파일 | 책임 | 작성 |
 |---|---|---|
 | `index.html` | 페이지 뼈대, 스크립트 로드 순서 | Task 1 |
-| `assets/ds/tokens.css`, `assets/ds/colors_and_type.css` | PARAMETA DS 원본 복사 (수정 금지) | Task 1 |
+| `assets/tokens.css` | 도감 전용 디자인 토큰 (다크모드 포함) | Task 1 |
 | `assets/theme.css` | 다크모드 시맨틱 색 재매핑 | Task 1 |
 | `assets/gallery.css` | 갤러리 레이아웃 | Task 1 |
 | `assets/behaviors.js` | 데모 동작 함수 | Task 1 |
@@ -52,11 +52,7 @@
 - 항목 스키마: `{ id:'A-01', group?, name, source, url, look, states, motion:{trigger, change, timing, inferred:boolean}, feel:string[], fits:string[], tall?:boolean, demo:string(HTML, 아이콘은 {{i:키}}), css:string }`
 - `scripts/lib.mjs`: `ROOT`, `loadAll() → { D, S, B, errors }`, `buildMd(all) → string`
 
-- [ ] **Step 1: DS 원본 복사**
-
-```bash
-mkdir -p /Users/sang/Desktop/arrow/assets/ds && cp "/Users/sang/Desktop/ai for work/homepage_v2/assets/ds/tokens.css" "/Users/sang/Desktop/ai for work/homepage_v2/assets/ds/colors_and_type.css" /Users/sang/Desktop/arrow/assets/ds/
-```
+- [ ] **Step 1: 도감 토큰 파일** — `assets/tokens.css` (색·폰트·간격·라운드·그림자·모션 + 다크모드). (2026-11-27: 외부 디자인 시스템 복사본을 이 파일로 대체)
 
 - [ ] **Step 2: 테스트 먼저 작성**
 
@@ -203,7 +199,7 @@ export function buildMd({ D, S, B }) {
   L.push('> 이 파일은 `data/*.js`에서 자동 생성된다. 직접 고치지 말고 `node scripts/build-md.mjs`로 다시 만든다.');
   L.push('>');
   L.push('> **쓰는 법:** "B-04처럼 만들어줘", "모션 세트 S2로 T07 버튼"처럼 번호로 지시하면 아래 HTML·CSS·JS를 그대로 쓰면 된다.');
-  L.push('> 색·폰트·간격은 PARAMETA DS 토큰(`assets/ds/tokens.css`, `assets/ds/colors_and_type.css`, 다크모드 `assets/theme.css`)을 참조한다. 모션 수치(ms, easing)는 출처 값 그대로다. "추정"은 출처에 수치가 없어 재현값을 쓴 것.');
+  L.push('> 색·폰트·간격은 도감 토큰(`assets/tokens.css`)을 참조한다. 모션 수치(ms, easing)는 출처 값 그대로다. "추정"은 출처에 수치가 없어 재현값을 쓴 것.');
   L.push('> 리서치 원문(출처 URL·수치): `research/*.md`', '');
   L.push(`총 ${items.length}종 + 모션 세트 ${S.SETS.length}개 × 버튼 종류 ${S.TYPES.length}개`, '');
   L.push('## 목차', '');
@@ -357,7 +353,7 @@ window.ARROW_DATA = (function () {
       return B[n].toString() + '\ndocument.querySelectorAll(\'[data-behavior~="' + n + '"]\').forEach(' + n + ');';
     }).join('\n\n');
   }
-  var DS_NOTE = '/* 색·폰트·간격: PARAMETA DS 토큰 필요 (assets/ds/tokens.css + colors_and_type.css, 다크모드 assets/theme.css) */';
+  var DS_NOTE = '/* 색·폰트·간격: 도감 토큰 필요 (assets/tokens.css) */';
   function codeFor(item, B) {
     var names = behaviorsOf(item.demo);
     var out = '<!-- ' + item.id + ' ' + item.name + ' — 출처: ' + item.url + ' -->\n' + expand(item.demo).trim() +
@@ -785,7 +781,7 @@ Expected: PASS (core, 카테고리 로드·번호 테스트, S, MD 모두 통과
 
 ```css path=assets/theme.css
 /* arrow 폴더 공통 테마 레이어 (2026-11-26 추가, 사용자 승인)
- * PARAMETA DS 원본(assets/ds/*)은 수정하지 않고, DS 원시 토큰으로 다크모드 시맨틱 색만 다시 매핑한다.
+ * 다크모드 시맨틱 색 재매핑 (이후 assets/tokens.css 로 통합됨).
  * 값을 바꾸면 index.html 의 ?v= 를 올린다. */
 :root { color-scheme: light; }
 
@@ -821,7 +817,7 @@ Expected: PASS (core, 카테고리 로드·번호 테스트, S, MD 모두 통과
 ```
 
 ```css path=assets/gallery.css
-/* 도감 레이아웃 — PARAMETA DS 토큰만 사용. 수정하면 index.html 의 ?v= 를 올린다. */
+/* 도감 레이아웃 — 도감 토큰만 사용. 수정하면 index.html 의 ?v= 를 올린다. */
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-padding-top: calc(var(--space-12) - var(--space-6)); }
@@ -1237,7 +1233,7 @@ a.g-id:hover { color: var(--fg-1); opacity: 1; }
   <p class="g-empty" data-empty hidden>검색 결과가 없다.</p>
 </main>
 <footer class="g-foot g-wrap">
-  <p>모든 항목은 실제 출처(라이브러리 CSS·소스, 디자인 시스템 문서, 라이브 사이트 계산값)를 확인해 재현했다. 색은 PARAMETA DS 흑백 토큰으로 통일했고 원래 색은 스펙에 적었다.</p>
+  <p>모든 항목은 실제 출처(라이브러리 CSS·소스, 디자인 시스템 문서, 라이브 사이트 계산값)를 확인해 재현했다. 색은 도감 흑백 토큰으로 통일했고 원래 색은 스펙에 적었다.</p>
   <p>번호별 스펙: ARROWS.md · 리서치 원문: research/ · 생성: node scripts/build-md.mjs</p>
 </footer>
 <script src="data/core.js?v=1"></script>
@@ -1403,10 +1399,10 @@ window.ARROW_SETS = (function () {
       }
     },
     {
-      key: 'S2', name: '실크 (PARAMETA 기본)', feel: '빠르게 출발해서 길고 부드럽게 멈춤. 바운스 없음.',
-      use: '프리미엄 소비자·핀테크, 설정, 제품 CTA, 캐러셀. PARAMETA DS 모션 토큰을 그대로 쓴다.',
+      key: 'S2', name: '실크', feel: '빠르게 출발해서 길고 부드럽게 멈춤. 바운스 없음.',
+      use: '프리미엄 소비자·핀테크, 설정, 제품 CTA, 캐러셀. 도감 기본 모션 토큰을 그대로 쓴다.',
       basis: [
-        { label: 'PARAMETA DS --ease-out · --duration-fast/base (assets/ds/tokens.css)', url: '' },
+        { label: '도감 토큰 --ease-out · --duration-fast/base (assets/tokens.css)', url: '' },
         { label: 'Emil Kowalski strong ease-out · 누름 0.95–0.98', url: 'https://raw.githubusercontent.com/emilkowalski/skills/main/skills/emil-design-eng/SKILL.md' },
         { label: 'Fluent 2 duration', url: 'https://raw.githubusercontent.com/microsoft/fluentui/master/packages/tokens/src/global/durations.ts' },
         { label: 'SwiftUI .smooth (bounce 0)', url: 'https://developer.apple.com/tutorials/data/documentation/swiftui/spring/smooth(duration:extrabounce:).json' }

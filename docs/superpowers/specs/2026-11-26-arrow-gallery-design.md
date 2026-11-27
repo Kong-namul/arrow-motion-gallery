@@ -1,7 +1,7 @@
 # 좌우 화살표 레퍼런스 갤러리 — 설계
 
 - 날짜: 2026-11-26
-- 상태: 사용자 승인 (갤러리 + 스펙 MD, PARAMETA DS 토큰, 공유 링크 포함)
+- 상태: 사용자 승인 (갤러리 + 스펙 MD, 도감 전용 토큰, 배포 포함)
 
 ## 목적
 
@@ -20,7 +20,7 @@
 | `data/sets.js` | 모션 세트(S1~S4) 변수값 + 버튼 종류(T01~) 마크업·CSS |
 | `assets/behaviors.js` | 데모 동작(캐러셀, 스크롤, 페이지, 로딩 시퀀스, 홀드 등). 함수 단위로 복사 가능 |
 | `research/*.md` | 리서치 원문 (출처 URL·수치 포함) |
-| `assets/ds/tokens.css`, `assets/ds/colors_and_type.css` | PARAMETA DS 원본 복사. 수정 금지 |
+| `assets/tokens.css` | 도감 전용 디자인 토큰 SSOT (색·폰트·간격·라운드·그림자·모션, 다크모드 포함) |
 | `assets/theme.css` | arrow 폴더 공통 레이어. DS 원시 토큰으로 다크모드 시맨틱 색만 재정의 (사용자 승인) |
 | `assets/gallery.css` | 갤러리 레이아웃(카드, 필터, 헤더). DS 토큰만 사용 |
 | `assets/gallery.js` | 렌더링, 필터, 슬로모션, 복사, 데모 동작(캐러셀 이동·스크롤 오버플로 감지 등) |

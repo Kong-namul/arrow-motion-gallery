@@ -212,7 +212,3 @@ The nudge distances are my proposals; no source specifies them. Everything else 
 - The M3 web pages and the HIG didn't render when fetched, so the M3 and Apple numbers come from Compose, MDC-Android, Flutter token source and Apple's doc JSON.
 - I found no numeric M3 ripple spec, no Spectrum motion tokens, and no Linear motion values.
 - Exits follow different camps. Carbon, Atlassian and Kinetics use ease-in exits; Emil says never use ease-in. Sets A and D follow Carbon; set B follows Emil.
-
-## Note for this project
-
-The spec at /Users/sang/Desktop/arrow/docs/superpowers/specs/2026-11-26-arrow-gallery-design.md requires all motion to use DS tokens. The PARAMETA DS `tokens.css` isn't in the folder yet, so I couldn't check whether it already has motion or easing tokens. If it doesn't, your CLAUDE.md says to ask before adding these sets' durations, easings and press scales to the shared token file.

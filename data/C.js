@@ -6,7 +6,7 @@ ARROW_DATA.addIcons({
   /* Stripe식 10×10 셰브론 + 숨은 선 (C-05) */
   'c-stripe': '<svg class="ic" viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="line" d="M0 5h7"/><path class="tip" d="M1 1l4 4-4 4"/></svg>',
   /* 66×43 뷰박스의 셰브론 3개 (C-14, 퍼센트 이동이 뷰박스 폭 기준이라 원본 비율 유지) */
-  'c-chevs3': '<svg class="ic" viewBox="0 0 66 43" width="40" height="26" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="three" d="M5 5l16 16.5L5 38"/><path class="two" d="M25 5l16 16.5L25 38"/><path class="one" d="M45 5l16 16.5L45 38"/></svg>',
+  'c-chevs3': '<svg class="ic" viewBox="0 0 66 43" width="40" height="26" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(3.78 0)"><path class="three" d="M5 5l16 16.5L5 38"/><path class="two" d="M25 5l16 16.5L25 38"/><path class="one" d="M45 5l16 16.5L45 38"/></g></svg>',
   /* 46×16 롱 화살표 (C-33, 원본 30×10 표시) */
   'c-long': '<svg class="ic" viewBox="0 0 46 16" width="30" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 8h43"/><path d="M37 1.5l7 6.5-7 6.5"/></svg>'
 });
@@ -383,6 +383,9 @@ ARROW_DATA.add([
 .C-15 .ar { position: absolute; top: 35%; width: 11%; height: 30%; background: var(--fg-3); transition: .2s; }
 .C-15 .ar-l { left: -13.5%; clip-path: polygon(100% 0, 100% 100%, 0 50%); }
 .C-15 .ar-r { left: 102%; clip-path: polygon(100% 49%, 0 0, 0 100%); }
+/* 광학 보정: 삼각형 무게중심은 평평한 쪽에서 폭의 1/3 → 폭의 1/6(translate % 는 자기 폭 기준) 만큼 꼭짓점 쪽으로. 왕복은 transform 이라 겹치지 않는다 */
+.C-15 .ar-l { translate: calc(var(--optical, 1) * -16.667%) 0; }
+.C-15 .ar-r { translate: calc(var(--optical, 1) * 16.667%) 0; }
 .C-15 button:is(:hover, :focus-visible) .clip { --c15: var(--fg-1); }
 .C-15 button:is(:hover, :focus-visible) .ar-r { left: -15%; background: var(--fg-1); animation: C-15-r .6s ease-in-out both infinite alternate; }
 .C-15 button:is(:hover, :focus-visible) .ar-l { left: 103%; background: var(--fg-1); animation: C-15-l .6s ease-in-out both infinite alternate; }
@@ -441,6 +444,9 @@ ARROW_DATA.add([
 .C-17 .nav::before { content: ""; position: absolute; inset: 0; background: var(--bg-1); border-radius: 50%; opacity: 0; transform: scale(.9); transition: transform .3s, opacity .3s; }
 .C-17 .iw { position: relative; display: block; width: 80%; height: 80%; margin: 10% 0 0 10%; }
 .C-17 .next .iw { transform: rotate(180deg); }
+/* 광학 보정: 셰브론 가로 폭 ≈ 10px(막대 20px × sin30°), 1/6 ≈ 1.7px 를 가리키는 쪽으로. translate 는 부모 좌표라 next 의 180° 회전과 무관하게 부호를 직접 준다 */
+.C-17 .prev .iw { translate: calc(var(--optical, 1) * -1.7px) 0; }
+.C-17 .next .iw { translate: calc(var(--optical, 1) * 1.7px) 0; }
 .C-17 .iw::before, .C-17 .iw::after { content: ""; position: absolute; left: 25%; width: 3px; height: 50%; background: var(--bg-1); backface-visibility: hidden; transition: transform .3s, background-color .3s; }
 .C-17 .iw::before { transform: translateX(-50%) rotate(30deg); transform-origin: 0 100%; }
 .C-17 .iw::after { top: 50%; transform: translateX(-50%) rotate(-30deg); transform-origin: 0 0; }
@@ -478,6 +484,9 @@ ARROW_DATA.add([
 .C-18 .next::before, .C-18 .next .iw::before { transform: translateX(-50%) rotate(135deg); transform-origin: 50% 0%; }
 .C-18 .nav::after, .C-18 .iw::after { transform: translateX(-50%) rotate(-45deg); transform-origin: 0 0; }
 .C-18 .next::after, .C-18 .next .iw::after { transform: translateX(-50%) rotate(45deg); transform-origin: 100% 0%; }
+/* 광학 보정: 팔 40px × sin45° ≈ 가로 폭 28px, 1/6 ≈ 4.7px 를 가리키는 쪽으로 (팔 회색·덧칠 모두, 라벨은 그대로) */
+.C-18 .prev::before, .C-18 .prev::after, .C-18 .prev .iw { translate: calc(var(--optical, 1) * -4.7px) 0; }
+.C-18 .next::before, .C-18 .next::after, .C-18 .next .iw { translate: calc(var(--optical, 1) * 4.7px) 0; }
 .C-18 .lb { position: absolute; top: 50%; font-size: var(--text-14); line-height: var(--lh-14); font-weight: var(--weight-regular); white-space: nowrap; color: var(--fg-1); opacity: 0; transition: transform .3s, opacity .3s; }
 .C-18 .prev .lb { left: 100%; transform: translateY(-50%) translateX(-50%); }
 .C-18 .next .lb { right: 100%; transform: translateY(-50%) translateX(50%); }
@@ -507,6 +516,9 @@ ARROW_DATA.add([
 .C-19 button { position: relative; width: 50px; height: 60px; padding: 0; background: none; border: 0; cursor: pointer; transition: transform .1s; }
 .C-19 .g { position: absolute; inset: 0; }
 .C-19 .prev .g { transform: scaleX(-1); }
+/* 광학 보정: 팔 50px × sin45° ≈ 가로 폭 35px, 1/6 ≈ 5.9px 를 가리키는 쪽으로. prev 는 scaleX(-1) 이지만 translate 는 부모 좌표라 부호를 직접 준다 */
+.C-19 .prev .g { translate: calc(var(--optical, 1) * -5.9px) 0; }
+.C-19 .next .g { translate: calc(var(--optical, 1) * 5.9px) 0; }
 .C-19 .arm { position: absolute; top: 50%; left: -5px; width: 100%; height: 4px; background: var(--border-strong); }
 .C-19 .arm::after { content: ""; position: absolute; top: 0; height: 100%; background: var(--fg-1); transition: all .15s; }
 .C-19 .top { transform: rotate(45deg); transform-origin: bottom right; }
@@ -879,6 +891,8 @@ ARROW_DATA.add([
 .C-32 .v1 { position: relative; display: flex; align-items: center; width: 200px; height: 40px; padding: 0 15px; font: inherit; font-size: var(--text-14); color: var(--bg-1); background: var(--fg-1); border: 0; border-radius: var(--radius-md); cursor: pointer; transition-duration: .2s; }
 .C-32 .v1 .arw { position: absolute; right: 0; display: flex; align-items: center; justify-content: center; width: 30px; height: 100%; font-size: var(--text-18); }
 .C-32 .v1:is(:hover, :focus-visible) { background: var(--fg-2); }
+/* 광학 보정: › 글리프 잉크 폭 ≈ .3em, 1/6 ≈ .05em (18px 에서 약 1px) 오른쪽으로. transform 애니메이션과 겹치지 않게 translate 속성 */
+.C-32 .v1 .arw { translate: calc(var(--optical, 1) * 0.05em) 0; }
 .C-32 .v1:is(:hover, :focus-visible) .arw { animation: C-32-in .6s ease-out both; }
 .C-32 .v1:active { transform: translate(1px, 1px); }
 .C-32 .v2 { display: inline-flex; align-items: center; gap: var(--space-2); padding: 10px 20px; font: inherit; font-size: var(--text-16); color: var(--bg-1); background: var(--fg-3); border: 0; border-radius: 20px; cursor: pointer; transition: background-color 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1); }

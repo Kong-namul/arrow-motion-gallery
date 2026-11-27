@@ -58,7 +58,11 @@
   .D-01 .row::scroll-button(left) { content: "◄" / "이전"; left: calc(anchor(left) + 4px); }
   .D-01 .row::scroll-button(right) { content: "►" / "다음"; right: calc(anchor(right) + 4px); }
   .D-01 .row::scroll-button(*):hover, .D-01 .row::scroll-button(*):focus-visible { opacity: 1; }
-  .D-01 .row::scroll-button(*):active { translate: 1px 1px; }
+  /* 광학 보정: ◄ ► 삼각형 잉크 폭 ≈ .5em, 1/6 ≈ .08em 만큼 가리키는 쪽으로 (14px 에서 약 1px). :active 는 아래에서 덮어써 같이 쓴다 */
+  .D-01 .row::scroll-button(left) { translate: calc(var(--optical, 1) * -0.08em) 0; }
+  .D-01 .row::scroll-button(right) { translate: calc(var(--optical, 1) * 0.08em) 0; }
+  .D-01 .row::scroll-button(left):active { translate: calc(var(--optical, 1) * -0.08em + 1px) 1px; }
+  .D-01 .row::scroll-button(right):active { translate: calc(var(--optical, 1) * 0.08em + 1px) 1px; }
   .D-01 .row::scroll-button(*):disabled { opacity: .2; cursor: unset; }
   .D-01 .row::scroll-marker-group { display: flex; gap: var(--space-2); justify-content: center; margin-top: 20px; }
   .D-01 .chip::scroll-marker { content: ""; width: 16px; height: 16px; border: 2px solid var(--fg-1); border-radius: 50%; transition: all 0.7s; }
@@ -269,7 +273,10 @@
 .D-08 .pg:focus-visible { outline: 2px solid var(--fg-1); outline-offset: -2px; }
 .D-08 .chev { width: 8px; height: 8px; border: solid currentColor; border-width: 2px 2px 0 0; }
 .D-08 .pg-l .chev { transform: rotate(-135deg); }
-.D-08 .pg-r .chev { transform: rotate(45deg); }`
+.D-08 .pg-r .chev { transform: rotate(45deg); }
+/* 광학 보정: 셰브론 가로 폭 ≈ 6px(변 8px × sin45° + 선 두께), 1/6 ≈ 1px 를 가리키는 쪽으로 (translate 는 회전과 별개) */
+.D-08 .pg-l .chev { translate: calc(var(--optical, 1) * -1px) 0; }
+.D-08 .pg-r .chev { translate: calc(var(--optical, 1) * 1px) 0; }`
     },
     {
       id: 'D-09', group: '라이브러리 스크롤 컨트롤',

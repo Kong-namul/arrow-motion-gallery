@@ -87,6 +87,9 @@
 .E-01 .arr-r:hover::before { rotate: -40deg; } .E-01 .arr-r:hover::after { rotate: 40deg; }
 .E-01 .arr-r:active::before { rotate: -36deg; } .E-01 .arr-r:active::after { rotate: 36deg; }
 .E-01 .arr:hover:not(:disabled), .E-01 .arr:focus-visible { opacity: 1; }
+/* 광학 보정: 막대 2.6em × sin45° ≈ 가로 폭 1.84em, 1/6 ≈ .31em 를 가리키는 쪽으로 (막대 의사요소만 — 버튼 상자·포커스 링·바운스는 그대로) */
+.E-01 .arr-l::before, .E-01 .arr-l::after { translate: calc(var(--optical, 1) * -.31em) 0; }
+.E-01 .arr-r::before, .E-01 .arr-r::after { translate: calc(var(--optical, 1) * .31em) 0; }
 .E-01 .arr:focus-visible { outline: 2px solid var(--bg-1); outline-offset: -.4em; }
 .E-01 .arr:disabled { opacity: .3; cursor: default; }
 .E-01.is-start .arr-r:not(:hover) { animation: E-01-bounce-right 2s 50 both ease-out; }

@@ -3,7 +3,7 @@
   'use strict';
   var D = window.ARROW_DATA;
   var B = window.ARROW_BEHAVIORS || {};
-  var S = window.ARROW_SETS && window.ARROW_SETS.SETS && window.ARROW_SETS.SETS.length ? window.ARROW_SETS : null;
+  var S = window.ARROW_SETS && window.ARROW_SETS.SETS && window.ARROW_SETS.SETS.length && window.ARROW_SETS.STYLES && window.ARROW_SETS.STYLES.length ? window.ARROW_SETS : null;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -12,9 +12,11 @@
   var main = $('[data-sections]');
   var nativeTimeout = window.setTimeout.bind(window); /* 갤러리 자체 UI 타이머는 '느리게'의 영향을 받지 않는다 */
 
-  /* 1. 데모 CSS 주입 — 복사 버튼이 주는 CSS와 같은 문자열 */
+  /* 1. 데모 CSS 주입 — 복사 버튼이 주는 CSS와 같은 문자열·같은 순서 (BASE → 호버 스타일 → 버튼 종류) */
   var style = document.createElement('style');
-  style.textContent = (S ? S.BASE + '\n\n' + S.TYPES.map(function (t) { return '/* ' + t.key + ' */\n' + t.css; }).join('\n\n') + '\n\n' : '') +
+  style.textContent = (S ? S.BASE + '\n\n' +
+    S.STYLES.map(function (h) { return '/* ' + h.key + ' ' + h.name + ' */\n' + h.css; }).join('\n\n') + '\n\n' +
+    S.TYPES.map(function (t) { return '/* ' + t.key + ' */\n' + t.css; }).join('\n\n') + '\n\n' : '') +
     items.map(function (a) { return '/* ' + a.id + ' */\n' + a.css; }).join('\n\n');
   document.head.appendChild(style);
 
@@ -62,44 +64,85 @@
     return sec;
   }
 
-  function varsStyle(vars) { return Object.keys(vars).map(function (k) { return k + ':' + vars[k]; }).join(';'); }
+  /* 근거 링크: '#G-09' 처럼 카탈로그 번호면 같은 페이지 카드로(제목은 카드 이름), 아니면 새 탭 */
+  function ref(b) {
+    if (!b.href) return esc(b.label);
+    if (b.href.charAt(0) === '#') {
+      var hit = items.filter(function (a) { return '#' + a.id === b.href; })[0];
+      return '<a href="' + esc(b.href) + '"' + (hit ? ' title="' + esc(hit.id + ' ' + hit.name) + '"' : '') + '>' + esc(b.label) + '</a>';
+    }
+    return '<a href="' + esc(b.href) + '" target="_blank" rel="noopener noreferrer">' + esc(b.label) + '</a>';
+  }
 
+  /* 매트릭스: 열 = 호버 스타일(.hs-* 를 칸에), 행 = 버튼 종류, 타이밍 칩 = 매트릭스 루트에 그 세트의 --m-* 를 인라인으로 깐다 */
+  var mxTiming = 0;
   function matrix() {
+    var H = S.STYLES;
+    mxTiming = Math.max(0, S.SETS.map(function (s) { return s.key; }).indexOf('S2'));
     var sec = el('section', 'g-sec');
     sec.id = 'cat-S';
     sec.dataset.cat = 'S';
     sec.appendChild(el('div', 'g-sec-head',
-      '<h2 class="g-sec-title"><span class="g-sec-key">S</span>모션 세트 매트릭스<span class="g-sec-n">' + S.SETS.length + ' 세트 × ' + S.TYPES.length + ' 종류</span></h2>' +
+      '<h2 class="g-sec-title"><span class="g-sec-key">S</span>모션 세트 매트릭스<span class="g-sec-n">호버 스타일 ' + H.length + ' × 타이밍 ' + S.SETS.length + ' · 버튼 ' + S.TYPES.length + '종</span></h2>' +
       '<p class="g-sec-desc">' + esc(S.desc) + '</p>'));
-    var tabs = el('div', 'g-mx-tabs');
+    var timing = el('div', 'g-mx-timing', '<span class="g-mx-label">타이밍</span>');
+    timing.setAttribute('role', 'group');
+    timing.setAttribute('aria-label', '타이밍 세트');
     S.SETS.forEach(function (s, k) {
-      tabs.appendChild(el('button', 'g-chip', esc(s.key + ' ' + s.name)));
+      var b = el('button', 'g-chip', esc(s.key + ' ' + s.name));
+      b.type = 'button';
+      b.dataset.timing = String(k);
+      timing.appendChild(b);
+    });
+    sec.appendChild(timing);
+    var feel = el('p', 'g-mx-feel');
+    feel.setAttribute('aria-live', 'polite');
+    sec.appendChild(feel);
+    var tabs = el('div', 'g-mx-tabs');
+    tabs.setAttribute('role', 'group');
+    tabs.setAttribute('aria-label', '호버 스타일');
+    H.forEach(function (h, k) {
+      tabs.appendChild(el('button', 'g-chip', esc(h.key + ' ' + h.name)));
       tabs.lastChild.type = 'button';
-      tabs.lastChild.dataset.setTab = String(k);
+      tabs.lastChild.dataset.colTab = String(k);
       tabs.lastChild.setAttribute('aria-pressed', String(k === 0));
     });
     sec.appendChild(tabs);
+    var scroll = el('div', 'g-mx-scroll');
     var mx = el('div', 'g-mx');
-    mx.style.setProperty('--cols', String(S.SETS.length));
-    mx.appendChild(el('div', 'g-mx-corner', '<span class="g-id">세트 → / 종류 ↓</span>'));
-    S.SETS.forEach(function (s, k) {
+    mx.style.setProperty('--cols', String(H.length));
+    mx.appendChild(el('div', 'g-mx-corner', '<span class="g-id">스타일 → / 종류 ↓</span>'));
+    H.forEach(function (h, k) {
       var col = el('div', 'g-mx-col',
-        '<div class="g-row"><span class="g-id">' + s.key + '</span><h3 class="g-name">' + esc(s.name) + '</h3></div>' +
-        '<p>' + esc(s.feel) + '</p><p class="g-mx-use">' + esc(s.use) + '</p>' +
-        '<button type="button" class="g-copy" data-copy-set="' + k + '">세트 CSS 복사</button>');
-      col.dataset.set = String(k);
+        '<div class="g-row"><span class="g-id">' + h.key + '</span><h3 class="g-name">' + esc(h.name) + '</h3></div>' +
+        '<p>' + esc(h.desc) + '</p><p class="g-mx-use">근거 ' + h.basis.map(ref).join(' · ') + '</p>' +
+        '<button type="button" class="g-copy" data-copy-style="' + k + '">이 조합 CSS 복사</button>');
+      col.dataset.col = String(k);
       mx.appendChild(col);
     });
     S.TYPES.forEach(function (t) {
       mx.appendChild(el('div', 'g-mx-row', '<div class="g-row"><span class="g-id">' + t.key + '</span><h3 class="g-name">' + esc(t.name) + '</h3></div><p>' + esc(t.desc) + '</p>'));
-      S.SETS.forEach(function (s, k) {
-        var c = el('div', 'g-mx-cell' + (t.tall ? ' g-mx-cell--tall' : ''), D.expand(t.demo));
-        c.dataset.set = String(k);
-        c.setAttribute('style', varsStyle(s.vars));
+      H.forEach(function (h, k) {
+        var c = el('div', 'g-mx-cell ' + h.cls + (t.tall ? ' g-mx-cell--tall' : ''), D.expand(t.demo));
+        c.dataset.col = String(k);
         mx.appendChild(c);
       });
     });
-    sec.appendChild(mx);
+    scroll.appendChild(mx);
+    sec.appendChild(scroll);
+    function setTiming(k) {
+      var s = S.SETS[k];
+      mxTiming = k;
+      Object.keys(s.vars).forEach(function (n) { mx.style.setProperty(n, s.vars[n]); });
+      $$('[data-timing]', timing).forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.timing === String(k))); });
+      feel.textContent = s.key + ' ' + s.name + ' — ' + s.feel + ' 쓰는 곳: ' + s.use;
+    }
+    timing.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-timing]');
+      if (b) setTiming(parseInt(b.dataset.timing, 10));
+    });
+    setTiming(mxTiming);
+    sec.appendChild(el('h3', 'g-group', '타이밍 세트 비교'));
     var table = '<table class="g-table"><thead><tr><th>변수</th><th>뜻</th>' +
       S.SETS.map(function (s) { return '<th>' + s.key + ' ' + esc(s.name) + '</th>'; }).join('') + '</tr></thead><tbody>' +
       S.VARS.map(function (v) {
@@ -112,13 +155,14 @@
         return b.url ? '<a href="' + esc(b.url) + '" target="_blank" rel="noopener noreferrer">' + esc(b.label) + '</a>' : esc(b.label);
       }).join(' · ') + '</li>';
     }).join('')));
+    /* 모바일(<768px): 스타일 탭으로 한 열씩. 데스크톱에선 .is-off 가 효과 없음 */
     tabs.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-set-tab]');
+      var b = e.target.closest('[data-col-tab]');
       if (!b) return;
-      $$('[data-set-tab]', tabs).forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
-      $$('[data-set]', mx).forEach(function (x) { x.classList.toggle('is-off', x.dataset.set !== b.dataset.setTab); });
+      $$('[data-col-tab]', tabs).forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      $$('[data-col]', mx).forEach(function (x) { x.classList.toggle('is-off', x.dataset.col !== b.dataset.colTab); });
     });
-    $$('[data-set]', mx).forEach(function (x) { x.classList.toggle('is-off', x.dataset.set !== '0'); });
+    $$('[data-col]', mx).forEach(function (x) { x.classList.toggle('is-off', x.dataset.col !== '0'); });
     return sec;
   }
 
@@ -140,7 +184,7 @@
   /* 4. 필터·검색 */
   var chips = $('[data-filters]');
   var cats = [{ key: 'all', name: '전체', n: items.length }]
-    .concat(S ? [{ key: 'S', name: '모션 세트', n: S.SETS.length }] : [])
+    .concat(S ? [{ key: 'S', name: '모션 세트', n: S.STYLES.length }] : [])
     .concat(D.CATEGORIES.map(function (c) { return { key: c.key, name: c.name, n: items.filter(function (a) { return a.id[0] === c.key; }).length }; }).filter(function (c) { return c.n; }));
   chips.innerHTML = cats.map(function (c) {
     return '<button type="button" class="g-chip" data-filter="' + c.key + '" aria-pressed="' + (c.key === 'all') + '">' +
@@ -209,6 +253,14 @@
     document.getAnimations().forEach(function (an) { an.playbackRate = rate; });
   });
 
+  /* 5-1. 광학 보정 비교 */
+  var optBtn = $('[data-optical]');
+  if (optBtn) optBtn.addEventListener('click', function () {
+    var on = optBtn.getAttribute('aria-pressed') !== 'true';
+    optBtn.setAttribute('aria-pressed', String(on));
+    if (on) delete document.documentElement.dataset.optical; else document.documentElement.dataset.optical = 'off';
+  });
+
   /* 6. 테마 */
   var themeBtn = $('[data-theme-toggle]');
   var mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -241,10 +293,10 @@
     else fallback();
   }
   document.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-copy],[data-copy-set]');
+    var b = e.target.closest('[data-copy],[data-copy-style]');
     if (!b) return;
     if (b.dataset.copy) copyText(D.codeFor(items.filter(function (a) { return a.id === b.dataset.copy; })[0], B), b);
-    else copyText(D.setCode(S, S.SETS[parseInt(b.dataset.copySet, 10)], B), b);
+    else copyText(D.setCode(S, S.SETS[mxTiming], B, S.STYLES[parseInt(b.dataset.copyStyle, 10)]), b); /* 지금 고른 타이밍 × 그 열의 스타일 */
   });
 
   /* 8. #번호 로 이동 + 강조 — 필터·검색에 가려진 카드면 필터를 전체로 되돌린 뒤 이동 */

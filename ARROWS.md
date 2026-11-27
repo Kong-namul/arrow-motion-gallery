@@ -2,11 +2,11 @@
 
 > 이 파일은 `data/*.js`에서 자동 생성된다. 직접 고치지 말고 `node scripts/build-md.mjs`로 다시 만든다.
 >
-> **쓰는 법:** "B-04처럼 만들어줘", "모션 세트 S2로 T07 버튼"처럼 번호로 지시하면 아래 HTML·CSS·JS를 그대로 쓰면 된다.
-> 색·폰트·간격은 PARAMETA DS 토큰(`assets/ds/tokens.css`, `assets/ds/colors_and_type.css`, 다크모드 `assets/theme.css`)을 참조한다. 모션 수치(ms, easing)는 출처 값 그대로다. "추정"은 출처에 수치가 없어 재현값을 쓴 것.
+> **쓰는 법:** "B-04처럼 만들어줘", "모션 세트 H2 스윕 × S2로 T07 버튼"처럼 번호로 지시하면 아래 HTML·CSS·JS를 그대로 쓰면 된다.
+> 색·폰트·간격은 도감 토큰(`assets/tokens.css`, 다크모드 포함)을 참조한다. 모션 수치(ms, easing)는 출처 값 그대로다. "추정"은 출처에 수치가 없어 재현값을 쓴 것.
 > 리서치 원문(출처 URL·수치): `research/*.md`
 
-총 211종 + 모션 세트 4개 × 버튼 종류 15개
+총 211종 + 모션 세트: 호버 스타일 6개 × 타이밍 세트 4개 × 버튼 종류 15개
 
 ## 목차
 
@@ -21,11 +21,164 @@
 
 ## S. 모션 세트 매트릭스
 
-세트 = 같은 easing 계열 · 같은 누름 스케일 · 같은 duration 사다리 · 같은 밀림 거리 · 같은 상태 레이어 불투명도를 공유하는 버튼 묶음. 열(세트)을 바꾸면 변수만 바뀌고 모든 버튼이 같은 모션 언어로 움직인다. 색·불투명도는 어느 세트에서도 튕기지 않고, 공간 이동만 세트의 곡선을 탄다.
+두 축으로 고른다. 열 = 호버 스타일(H1~H6): 칠하기·스윕·차오름·테두리 그리기·들어올림·밀림처럼 효과 자체가 다르다. 위 타이밍 칩 = 타이밍 세트(S1~S4): 같은 easing 계열·누름 스케일·duration 사다리·상태 레이어 불투명도를 공유하는 --m-* 변수 묶음이라, 바꾸면 모든 칸이 같은 속도감으로 바뀐다. 아무 스타일 × 아무 타이밍이 조합된다. 누름 스케일과 포커스 링은 모든 스타일 공통이고, 색·불투명도는 어느 타이밍에서도 튕기지 않으며 공간 이동만 세트의 곡선을 탄다.
 
-### 세트 비교표
+조합 방법: 타이밍 변수(`:root` 의 `--m-*`) → 공통 베이스 → 호버 스타일 → 버튼 종류 순서로 CSS 를 넣고, 버튼들의 조상(감싸는 요소나 `body`)에 스타일 클래스(예: `.hs-sweep`)를 붙인다. 스타일 CSS 는 그 클래스 아래로만 범위가 잡혀 있다.
 
-| 변수 | 뜻 | S1 크리스프 | S2 실크 (PARAMETA 기본) | S3 스프링 | S4 에디토리얼 |
+### 호버 스타일
+
+| 스타일 | 클래스 | 효과 | 근거 |
+|---|---|---|---|
+| H1 칠하기 | `.hs-fill` | 비운 버튼(선·고스트·아이콘·화살표)은 --fg-1 로 칠해지며 글자·아이콘이 반전되고, 채운 버튼은 반대로 비워진다. 색만 호버 시간으로 페이드. | [G-04 M3 상태 레이어](#g-04-m3-상태-레이어) · [shadcn/ui Button — outline 호버 배경 채움](https://github.com/shadcn-ui/ui/blob/main/apps/v4/registry/new-york-v4/ui/button.tsx) |
+| H2 스윕 | `.hs-sweep` | 채움이 왼쪽에서 차오르고 떠날 때 오른쪽으로 빠진다. 비운 버튼은 글자가 채움과 함께 반전, 채운 버튼은 밝은 대비 레이어가 지나간다. | [G-09 위·왼쪽·가운데에서 채우기](#g-09-위왼쪽가운데에서-채우기) · [G-10 왼쪽에서 차고 오른쪽으로 빠지는 배경](#g-10-왼쪽에서-차고-오른쪽으로-빠지는-배경) |
+| H3 차오름 | `.hs-rise` | 채움이 아래에서 차오르고 라벨이 위로 한 번 굴러 바뀐다(텍스트 롤). 채운 버튼은 대비 레이어가 차오른다. | [G-11 바닥 띠가 차오르는 리퀴드 채움](#g-11-바닥-띠가-차오르는-리퀴드-채움) · [G-12 채움이 위로 빠지며 글자 반전 (Pan)](#g-12-채움이-위로-빠지며-글자-반전-pan) · [G-17 라벨이 위로 빠졌다 아래서 돌아옴](#g-17-라벨이-위로-빠졌다-아래서-돌아옴) |
+| H4 테두리 그리기 | `.hs-draw` | 테두리가 12시부터 시계 방향으로 그려진다. 비운 버튼은 제 테두리 위에, 채운 버튼은 3px 바깥에 링이 그려진다. | [G-14 테두리 그리기 / 드러내기](#g-14-테두리-그리기--드러내기) |
+| H5 들어올림 | `.hs-lift` | 2px 떠오르며 그림자가 깊어지고 테두리가 진해진다. 누르면 내려앉으며 그림자가 얕아진다. | [G-02 들림 + 그림자 깊어짐](#g-02-들림--그림자-깊어짐) · [G-66 3D 눌리는 버튼 (Pushable)](#g-66-3d-눌리는-버튼-pushable) |
+| H6 밀림 | `.hs-nudge` | 기존 방식. 글자색 상태 레이어가 깔리고, 화살표·트레일링 아이콘이 가리키는 쪽으로 --m-nudge 만큼 밀린다. 선 버튼은 테두리가, 고스트는 밑줄이 진해진다. | [G-04 M3 상태 레이어](#g-04-m3-상태-레이어) · [C-01 넛지 앤 리턴 (한 번)](#c-01-넛지-앤-리턴-한-번) |
+
+#### H1 칠하기
+
+비운 버튼(선·고스트·아이콘·화살표)은 --fg-1 로 칠해지며 글자·아이콘이 반전되고, 채운 버튼은 반대로 비워진다. 색만 호버 시간으로 페이드.
+
+- 클래스: `.hs-fill`
+- 근거: [G-04 M3 상태 레이어](#g-04-m3-상태-레이어) · [shadcn/ui Button — outline 호버 배경 채움](https://github.com/shadcn-ui/ui/blob/main/apps/v4/registry/new-york-v4/ui/button.tsx)
+
+```css
+/* H1 칠하기 — 비운 버튼은 칠해지고(글자 반전) 채운 버튼은 비워진다. --_bg/--_fg 만 바꾸면 BASE 의 색 전환(호버 시간)이 탄다.
+ * 누를 때는 상태 레이어(--m-layer-press). T11·T12 는 선택·켜짐 표시와 헷갈리지 않게 상태 레이어(밀림과 같음) */
+@media (hover: hover) and (pointer: fine) {
+  .hs-fill .mb:not(:disabled, .is-holding):hover { --_bg: transparent; --_fg: var(--fg-1); border-color: var(--fg-1); }
+  .hs-fill :is(.mb--line, .mb--ghost):not(:disabled, .is-holding):hover { --_bg: var(--fg-1); --_fg: var(--bg-1); }
+  .hs-fill .T11 button:not([aria-pressed="true"]):hover::before, .hs-fill .T12:hover::before { opacity: var(--m-layer-hover); }
+  .hs-fill .T12:hover { border-color: var(--fg-1); }
+}
+.hs-fill .mb:not(:disabled):active::before { opacity: var(--m-layer-press); }
+```
+
+#### H2 스윕
+
+채움이 왼쪽에서 차오르고 떠날 때 오른쪽으로 빠진다. 비운 버튼은 글자가 채움과 함께 반전, 채운 버튼은 밝은 대비 레이어가 지나간다.
+
+- 클래스: `.hs-sweep`
+- 근거: [G-09 위·왼쪽·가운데에서 채우기](#g-09-위왼쪽가운데에서-채우기) · [G-10 왼쪽에서 차고 오른쪽으로 빠지는 배경](#g-10-왼쪽에서-차고-오른쪽으로-빠지는-배경)
+
+```css
+/* H2 스윕 — 채움 레이어(::before)가 scaleX(0→1)로 왼쪽에서 차고, 떠날 때 transform-origin 을 오른쪽으로 바꿔 오른쪽으로 빠진다(G-10). 공간 이동이라 --m-move-*.
+ * 비운 버튼은 --fg-1 채움 + 글자 반전(채움과 같은 시간), 채운 버튼·켜진 T09 는 대비 레이어. T11·T12 는 상태 레이어가 같은 방식으로 지나간다 */
+.hs-sweep .mb::before { opacity: 1; background: color-mix(in srgb, var(--bg-1) 22%, transparent); transform: scaleX(0); transform-origin: right center; transition: transform var(--m-move-dur) var(--m-move-ease); }
+.hs-sweep :is(.mb--line, .mb--ghost)::before { background: var(--fg-1); }
+.hs-sweep .T09.is-on::before { background: color-mix(in srgb, var(--bg-1) 22%, transparent); }
+.hs-sweep .T11 button::before, .hs-sweep .T12::before { opacity: var(--m-layer-hover); transform: scaleX(0); transform-origin: right center; transition: transform var(--m-move-dur) var(--m-move-ease); }
+.hs-sweep :is(.mb--line, .mb--ghost) { transition: transform var(--m-release-dur) var(--m-release-ease), background-color var(--m-hover-dur) var(--m-hover-ease), color var(--m-move-dur) var(--m-hover-ease), border-color var(--m-move-dur) var(--m-hover-ease), box-shadow var(--m-focus-dur) var(--m-hover-ease); }
+.hs-sweep :is(.mb--line, .mb--ghost):active { transition: transform var(--m-press-dur) var(--m-press-ease), background-color var(--m-hover-dur) var(--m-hover-ease), color var(--m-move-dur) var(--m-hover-ease), border-color var(--m-move-dur) var(--m-hover-ease), box-shadow var(--m-focus-dur) var(--m-hover-ease); }
+@media (hover: hover) and (pointer: fine) {
+  .hs-sweep .mb:not(:disabled, .is-holding):hover::before, .hs-sweep .T11 button:not([aria-pressed="true"]):hover::before, .hs-sweep .T12:hover::before { transform: scaleX(1); transform-origin: left center; }
+  .hs-sweep :is(.mb--line, .mb--ghost):not(:disabled, .is-holding):hover { color: var(--bg-1); border-color: var(--fg-1); }
+  .hs-sweep .T12:hover { border-color: var(--fg-1); }
+}
+```
+
+#### H3 차오름
+
+채움이 아래에서 차오르고 라벨이 위로 한 번 굴러 바뀐다(텍스트 롤). 채운 버튼은 대비 레이어가 차오른다.
+
+- 클래스: `.hs-rise`
+- 근거: [G-11 바닥 띠가 차오르는 리퀴드 채움](#g-11-바닥-띠가-차오르는-리퀴드-채움) · [G-12 채움이 위로 빠지며 글자 반전 (Pan)](#g-12-채움이-위로-빠지며-글자-반전-pan) · [G-17 라벨이 위로 빠졌다 아래서 돌아옴](#g-17-라벨이-위로-빠졌다-아래서-돌아옴)
+
+```css
+/* H3 차오름 — 채움은 clip-path inset(100%→0)으로 아래에서 차오른다: translateY(100%→0)와 같은 모양이지만 overflow:visible 인 T09·T10 에서도 밖으로 새지 않는다.
+ * 텍스트 롤(.lb): 라벨 복제 없이 text-shadow 로 1.6em 아래에 사본을 두고, 라벨을 1.6em 올리는 동안 clip-path 를 같은 만큼 반대로 내려 보이는 창을 제자리에 고정한다(G-17). */
+.hs-rise .mb::before { opacity: 1; background: color-mix(in srgb, var(--bg-1) 22%, transparent); clip-path: inset(100% 0 0 0); transition: clip-path var(--m-move-dur) var(--m-move-ease); }
+.hs-rise :is(.mb--line, .mb--ghost)::before { background: var(--fg-1); }
+.hs-rise .T09.is-on::before { background: color-mix(in srgb, var(--bg-1) 22%, transparent); }
+.hs-rise .T11 button::before, .hs-rise .T12::before { opacity: var(--m-layer-hover); clip-path: inset(100% 0 0 0); transition: clip-path var(--m-move-dur) var(--m-move-ease); }
+.hs-rise :is(.mb--line, .mb--ghost) { transition: transform var(--m-release-dur) var(--m-release-ease), background-color var(--m-hover-dur) var(--m-hover-ease), color var(--m-move-dur) var(--m-hover-ease), border-color var(--m-move-dur) var(--m-hover-ease), box-shadow var(--m-focus-dur) var(--m-hover-ease); }
+.hs-rise :is(.mb--line, .mb--ghost):active { transition: transform var(--m-press-dur) var(--m-press-ease), background-color var(--m-hover-dur) var(--m-hover-ease), color var(--m-move-dur) var(--m-hover-ease), border-color var(--m-move-dur) var(--m-hover-ease), box-shadow var(--m-focus-dur) var(--m-hover-ease); }
+.hs-rise :is(.mb, .T11) .lb { display: inline-block; text-shadow: 0 1.6em currentColor; clip-path: inset(0); transition: transform var(--m-move-dur) var(--m-move-ease), clip-path var(--m-move-dur) var(--m-move-ease); }
+@media (hover: hover) and (pointer: fine) {
+  .hs-rise .mb:not(:disabled, .is-holding):hover::before, .hs-rise .T11 button:not([aria-pressed="true"]):hover::before, .hs-rise .T12:hover::before { clip-path: inset(0); }
+  .hs-rise :is(.mb--line, .mb--ghost):not(:disabled, .is-holding):hover { color: var(--bg-1); border-color: var(--fg-1); }
+  .hs-rise .mb:not(:disabled, .is-holding):hover .lb, .hs-rise .T11 button:not([aria-pressed="true"]):hover .lb { transform: translateY(-1.6em); clip-path: inset(1.6em 0 -1.6em 0); }
+  .hs-rise .T12:hover { border-color: var(--fg-1); }
+}
+```
+
+#### H4 테두리 그리기
+
+테두리가 12시부터 시계 방향으로 그려진다. 비운 버튼은 제 테두리 위에, 채운 버튼은 3px 바깥에 링이 그려진다.
+
+- 클래스: `.hs-draw`
+- 근거: [G-14 테두리 그리기 / 드러내기](#g-14-테두리-그리기--드러내기)
+
+```css
+/* H4 테두리 그리기 — ::before 를 conic-gradient 링으로 쓰고 각도 --hs-a 를 0→360deg (G-14). 각도를 전환하려면 @property 등록이 필요하다(미지원 브라우저는 즉시 그려짐).
+ * 마스크 두 장(content-box, border-box)을 exclude 로 겹쳐 padding 2px 링만 남긴다. 비운 버튼은 제 테두리 위(inset -1px), 채운 버튼·켜진 T09·T12 는 3px 바깥(inset -6px)이라 .mb 의 overflow 를 연다. 상태 변화라 --m-state-* */
+@property --hs-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.hs-draw .mb { overflow: visible; }
+.hs-draw .mb::before, .hs-draw .T11 button::before, .hs-draw .T12::before, .hs-draw .T12.is-on::before { padding: 2px; opacity: 1; background: conic-gradient(var(--fg-1) var(--hs-a), transparent 0); mask-image: linear-gradient(var(--fg-1) 0 0), linear-gradient(var(--fg-1) 0 0); mask-clip: content-box, border-box; mask-composite: exclude; transition: --hs-a var(--m-state-dur) var(--m-state-ease); }
+.hs-draw .mb::before, .hs-draw .T12::before { inset: -1px; }
+.hs-draw .mb:not(.mb--line, .mb--ghost)::before, .hs-draw .T09.is-on::before, .hs-draw .T12.is-on::before { inset: -6px; }
+.hs-draw .mb:not(.mb--line, .mb--ghost, .mb--icon)::before { border-radius: calc(var(--radius-md) + 5px); }
+@media (hover: hover) and (pointer: fine) {
+  .hs-draw .mb:not(:disabled):hover::before, .hs-draw .T11 button:not([aria-pressed="true"]):hover::before, .hs-draw .T12:hover::before { --hs-a: 360deg; }
+}
+```
+
+#### H5 들어올림
+
+2px 떠오르며 그림자가 깊어지고 테두리가 진해진다. 누르면 내려앉으며 그림자가 얕아진다.
+
+- 클래스: `.hs-lift`
+- 근거: [G-02 들림 + 그림자 깊어짐](#g-02-들림--그림자-깊어짐) · [G-66 3D 눌리는 버튼 (Pushable)](#g-66-3d-눌리는-버튼-pushable)
+
+```css
+/* H5 들어올림 — 호버 translateY(-2px) + --shadow-md + 테두리 --fg-1, 누르면 translateY(0) + --shadow-sm + 누름 스케일 (G-02·G-66). 떠오름은 공간 이동이라 --m-move-*.
+ * 포커스 링도 box-shadow 라 호버·누름 그림자와 겹쳐 쓴다. T13 항목은 열림 상태의 transform 을 이기도록 따로 적는다 */
+.hs-lift .mb { transition: transform var(--m-move-dur) var(--m-move-ease), box-shadow var(--m-move-dur) var(--m-move-ease), background-color var(--m-hover-dur) var(--m-hover-ease), color var(--m-hover-dur) var(--m-hover-ease), border-color var(--m-hover-dur) var(--m-hover-ease); }
+.hs-lift .T11 button { transition: color var(--m-hover-dur) var(--m-hover-ease), background-color var(--m-hover-dur) var(--m-hover-ease), transform var(--m-move-dur) var(--m-move-ease), box-shadow var(--m-move-dur) var(--m-move-ease); }
+.hs-lift .T12 { transition: background-color var(--m-hover-dur) var(--m-hover-ease), border-color var(--m-hover-dur) var(--m-hover-ease), transform var(--m-move-dur) var(--m-move-ease), box-shadow var(--m-move-dur) var(--m-move-ease); }
+@media (hover: hover) and (pointer: fine) {
+  .hs-lift .mb:not(:disabled):hover, .hs-lift .T12:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--fg-1); }
+  .hs-lift .mb:not(:disabled):focus-visible:hover, .hs-lift .T12:focus-visible:hover { box-shadow: 0 0 0 2px var(--bg-2), 0 0 0 4px var(--fg-1), var(--shadow-md); }
+  .hs-lift .T13.is-open .T13-items .mb:hover:not(:active) { transform: translateY(-2px); }
+  .hs-lift .T11 button:not([aria-pressed="true"]):hover { transform: translateY(-2px); background-color: var(--bg-1); box-shadow: var(--shadow-md); }
+}
+.hs-lift .mb:not(:disabled):active { transform: translateY(0) scale(var(--m-press-scale)); box-shadow: var(--shadow-sm); transition: transform var(--m-press-dur) var(--m-press-ease), box-shadow var(--m-press-dur) var(--m-press-ease), background-color var(--m-hover-dur) var(--m-hover-ease), color var(--m-hover-dur) var(--m-hover-ease), border-color var(--m-hover-dur) var(--m-hover-ease); }
+.hs-lift .T12:active { transform: translateY(0); box-shadow: var(--shadow-sm); }
+.hs-lift .mb:not(:disabled):focus-visible:active, .hs-lift .T12:focus-visible:active { box-shadow: 0 0 0 2px var(--bg-2), 0 0 0 4px var(--fg-1), var(--shadow-sm); }
+.hs-lift .T11 button:not([aria-pressed="true"]):active { transform: translateY(0) scale(var(--m-press-scale)); box-shadow: var(--shadow-sm); }
+```
+
+#### H6 밀림
+
+기존 방식. 글자색 상태 레이어가 깔리고, 화살표·트레일링 아이콘이 가리키는 쪽으로 --m-nudge 만큼 밀린다. 선 버튼은 테두리가, 고스트는 밑줄이 진해진다.
+
+- 클래스: `.hs-nudge`
+- 근거: [G-04 M3 상태 레이어](#g-04-m3-상태-레이어) · [C-01 넛지 앤 리턴 (한 번)](#c-01-넛지-앤-리턴-한-번)
+
+```css
+/* H6 밀림 — 기존 세트 방식: 상태 레이어(::before 를 글자색으로 --m-layer-* 만큼) + 화살표·트레일링 아이콘이 가리키는 쪽으로 --m-nudge.
+ * T02 테두리 진해짐, T03 밑줄, T04 원형 레이어 확대도 여기에만 있다 */
+.hs-nudge .mb:not(:disabled):active::before { opacity: var(--m-layer-press); }
+.hs-nudge .T03::before { display: none; }
+.hs-nudge .T03 .lb { background: linear-gradient(currentColor, currentColor) left bottom / 0% 1px no-repeat; padding-bottom: 2px; transition: background-size var(--m-hover-dur) var(--m-hover-ease); }
+.hs-nudge .T03:focus-visible .lb { background-size: 100% 1px; }
+.hs-nudge .T04::before { transform: scale(.6); transition: opacity var(--m-hover-dur) var(--m-hover-ease), transform var(--m-move-dur) var(--m-move-ease); }
+.hs-nudge .T04:active::before { transform: scale(1); }
+.hs-nudge :is(.T05, .T06, .T15) .ic { transition: transform var(--m-nudge-dur) var(--m-nudge-ease); }
+@media (hover: hover) and (pointer: fine) {
+  .hs-nudge .mb:not(:disabled):hover::before, .hs-nudge .T11 button:not([aria-pressed="true"]):hover::before, .hs-nudge .T12:hover::before { opacity: var(--m-layer-hover); }
+  .hs-nudge .T02:not(:disabled):hover, .hs-nudge .T12:hover { border-color: var(--fg-1); }
+  .hs-nudge .T03:hover .lb { background-size: 100% 1px; }
+  .hs-nudge .T04:hover::before { transform: scale(1); }
+  .hs-nudge .T05-b:first-child:hover .ic, .hs-nudge .T15-b[data-prev]:not(:disabled):hover .ic { transform: translateX(calc(var(--m-nudge) * -1)); }
+  .hs-nudge .T05-b:last-child:hover .ic, .hs-nudge .T06:hover .ic, .hs-nudge .T15-b[data-next]:not(:disabled):hover .ic { transform: translateX(var(--m-nudge)); }
+}
+```
+
+### 타이밍 세트 비교
+
+| 변수 | 뜻 | S1 크리스프 | S2 실크 | S3 스프링 | S4 에디토리얼 |
 |---|---|---|---|---|---|
 | `--m-hover-dur` | 호버 색·상태 레이어 전환 시간 | `70ms` | `var(--duration-fast)` | `150ms` | `240ms` |
 | `--m-hover-ease` | 호버 곡선 | `cubic-bezier(0.2, 0, 0.38, 0.9)` | `var(--ease-out)` | `ease` | `cubic-bezier(0.4, 0.14, 0.3, 1)` |
@@ -85,11 +238,11 @@
 }
 ```
 
-### S2 실크 (PARAMETA 기본)
+### S2 실크
 
 - 느낌: 빠르게 출발해서 길고 부드럽게 멈춤. 바운스 없음.
-- 쓰는 곳: 프리미엄 소비자·핀테크, 설정, 제품 CTA, 캐러셀. PARAMETA DS 모션 토큰을 그대로 쓴다.
-- 근거: PARAMETA DS --ease-out · --duration-fast/base (assets/ds/tokens.css) · [Emil Kowalski strong ease-out · 누름 0.95–0.98](https://raw.githubusercontent.com/emilkowalski/skills/main/skills/emil-design-eng/SKILL.md) · [Fluent 2 duration](https://raw.githubusercontent.com/microsoft/fluentui/master/packages/tokens/src/global/durations.ts) · [SwiftUI .smooth (bounce 0)](https://developer.apple.com/tutorials/data/documentation/swiftui/spring/smooth(duration:extrabounce:).json) · 리서치 Set B(200/300ms, quint-out) 대신 PARAMETA DS 토큰(180/280ms, cubic-bezier(.16,1,.3,1))을 씀
+- 쓰는 곳: 프리미엄 소비자·핀테크, 설정, 제품 CTA, 캐러셀. 도감 기본 모션 토큰(--ease-out, --duration-fast/base)을 그대로 쓴다.
+- 근거: 도감 토큰 --ease-out · --duration-fast/base (assets/tokens.css) · [Emil Kowalski strong ease-out · 누름 0.95–0.98](https://raw.githubusercontent.com/emilkowalski/skills/main/skills/emil-design-eng/SKILL.md) · [Fluent 2 duration](https://raw.githubusercontent.com/microsoft/fluentui/master/packages/tokens/src/global/durations.ts) · [SwiftUI .smooth (bounce 0)](https://developer.apple.com/tutorials/data/documentation/swiftui/spring/smooth(duration:extrabounce:).json) · 리서치 Set B(200/300ms, quint-out) 대신 도감 기본 토큰(180/280ms, cubic-bezier(.16,1,.3,1))을 씀
 
 ```css
 :root {
@@ -187,31 +340,31 @@
 }
 ```
 
-### 버튼 종류 (모든 세트 공통 마크업·CSS)
+### 버튼 종류 (모든 스타일·타이밍 공통 마크업·CSS)
 
 공통 베이스 CSS:
 
 ```css
-/* 공통 버튼 베이스 — 상태 레이어(::before)는 글자색을 --m-layer-* 만큼 깐다 */
+/* 공통 버튼 베이스 — 모양·누름 스케일·포커스 링·비활성은 모든 스타일 공통. 호버 효과는 스타일(.hs-*)이 정한다.
+ * .mb--line(선)·.mb--ghost(고스트·아이콘) = 비운 버튼, 나머지 = 채운 버튼. ::before 는 상태 레이어 자리 — 스타일이 레이어·채움·링으로 바꿔 쓴다 */
 .mb { --_bg: var(--fg-1); --_fg: var(--bg-1); position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: calc(var(--space-7) - var(--space-2)); padding: 0 var(--space-4); font: inherit; font-size: var(--text-14); line-height: var(--lh-14); font-weight: var(--weight-semibold); white-space: nowrap; color: var(--_fg); background: var(--_bg); border: 1px solid transparent; border-radius: var(--radius-md); cursor: pointer; isolation: isolate; overflow: hidden; -webkit-tap-highlight-color: transparent;
   transition: transform var(--m-release-dur) var(--m-release-ease), background-color var(--m-hover-dur) var(--m-hover-ease), color var(--m-hover-dur) var(--m-hover-ease), border-color var(--m-hover-dur) var(--m-hover-ease), box-shadow var(--m-focus-dur) var(--m-hover-ease); }
 .mb::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: currentColor; opacity: 0; pointer-events: none; transition: opacity var(--m-hover-dur) var(--m-hover-ease); }
-@media (hover: hover) and (pointer: fine) { .mb:hover::before { opacity: var(--m-layer-hover); } }
 .mb:active { transform: scale(var(--m-press-scale)); transition: transform var(--m-press-dur) var(--m-press-ease), background-color var(--m-hover-dur) var(--m-hover-ease), color var(--m-hover-dur) var(--m-hover-ease), border-color var(--m-hover-dur) var(--m-hover-ease), box-shadow var(--m-focus-dur) var(--m-hover-ease); }
-.mb:active::before { opacity: var(--m-layer-press); }
 .mb:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--bg-2), 0 0 0 4px var(--fg-1); }
 .mb:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 .mb .ic { width: var(--space-5); height: var(--space-5); flex: none; }
 .mb--line { --_bg: transparent; --_fg: var(--fg-1); border-color: var(--border-strong); }
+.mb--ghost { --_bg: transparent; --_fg: var(--fg-1); }
 .mb--icon { width: calc(var(--space-7) - var(--space-2)); padding: 0; border-radius: var(--radius-pill); }
 ```
 
 #### T01 프라이머리
 
-채운 버튼. 상태 레이어 + 누름 스케일만.
+채운 버튼. 호버는 열(스타일)을 따르고 누름 스케일은 공통.
 
 ```html
-<button type="button" class="mb T01">저장하기</button>
+<button type="button" class="mb T01"><span class="lb">저장하기</span></button>
 ```
 
 ```css
@@ -220,76 +373,62 @@
 
 #### T02 세컨더리 (아웃라인)
 
-선 버튼. 호버 때 테두리가 진해진다.
+선 버튼. 칠하기·스윕·차오름에선 --fg-1 로 채워지고, 밀림에선 테두리만 진해진다.
 
 ```html
-<button type="button" class="mb mb--line T02">취소</button>
+<button type="button" class="mb mb--line T02"><span class="lb">취소</span></button>
 ```
 
 ```css
-@media (hover: hover) and (pointer: fine) { .T02:hover { border-color: var(--fg-1); } }
+/* 모양은 .mb--line — 호버는 스타일(.hs-*)이 정한다 */
 ```
 
 #### T03 고스트 (텍스트 링크)
 
-배경 없음. 밑줄이 왼쪽부터 자란다.
+배경·테두리 없는 텍스트 버튼(.mb--ghost). 밀림에선 밑줄이 왼쪽부터 자라고, 다른 열에선 비운 버튼처럼 칠해지거나 그려진다.
 
 ```html
-<button type="button" class="mb T03"><span>더 알아보기</span></button>
+<button type="button" class="mb mb--ghost T03"><span class="lb">더 알아보기</span></button>
 ```
 
 ```css
-.T03 { --_bg: transparent; --_fg: var(--fg-1); padding: 0 var(--space-2); }
-.T03::before { display: none; }
-.T03 span { background: linear-gradient(currentColor, currentColor) left bottom / 0% 1px no-repeat; padding-bottom: 2px; transition: background-size var(--m-hover-dur) var(--m-hover-ease); }
-@media (hover: hover) and (pointer: fine) { .T03:hover span { background-size: 100% 1px; } }
-.T03:focus-visible span { background-size: 100% 1px; }
+.T03 { padding: 0 var(--space-2); }
 ```
 
 #### T04 아이콘 버튼
 
-원형 상태 레이어가 가운데서 커지며 나타난다.
+원형 고스트 아이콘 버튼. 밀림에선 원형 상태 레이어가 가운데서 커진다.
 
 ```html
-<button type="button" class="mb mb--icon T04" aria-label="공유"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
+<button type="button" class="mb mb--ghost mb--icon T04" aria-label="공유"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
 ```
 
 ```css
-.T04 { --_bg: transparent; --_fg: var(--fg-1); }
-.T04::before { transform: scale(.6); transition: opacity var(--m-hover-dur) var(--m-hover-ease), transform var(--m-move-dur) var(--m-move-ease); }
-@media (hover: hover) and (pointer: fine) { .T04:hover::before { transform: scale(1); } }
-.T04:active::before { transform: scale(1); }
+/* 모양은 .mb--ghost.mb--icon — 호버는 스타일(.hs-*)이 정한다 */
 ```
 
 #### T05 화살표 페어 (이전/다음)
 
-캐러셀·페이지 이동. 화살표가 가리키는 쪽으로 --m-nudge 만큼 밀린다.
+캐러셀·페이지 이동. 밀림 열에서만 화살표가 가리키는 쪽으로 --m-nudge 만큼 밀리고, 다른 열은 그 스타일의 버튼 효과만.
 
 ```html
-<div class="T05"><button type="button" class="mb mb--line mb--icon T05-b" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="mb mb--line mb--icon T05-b" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+<div class="T05"><button type="button" class="mb mb--line mb--icon T05-b" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="mb mb--line mb--icon T05-b" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 ```
 
 ```css
 .T05 { display: flex; gap: var(--space-2); }
-.T05 .ic { transition: transform var(--m-nudge-dur) var(--m-nudge-ease); }
-@media (hover: hover) and (pointer: fine) {
-  .T05-b:first-child:hover .ic { transform: translateX(calc(var(--m-nudge) * -1)); }
-  .T05-b:last-child:hover .ic { transform: translateX(var(--m-nudge)); }
-}
 ```
 
 #### T06 CTA + 트레일링 화살표
 
-라벨은 그대로, 화살표만 앞으로. 화살표 쌍과 같은 거리·시간.
+채운 CTA. 밀림 열에서만 화살표가 앞으로 밀린다(화살표 쌍과 같은 거리·시간).
 
 ```html
-<button type="button" class="mb T06"><span>시작하기</span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="shaft" d="M5 12h14"/><path class="head" d="M12 5l7 7-7 7"/></svg></button>
+<button type="button" class="mb T06"><span class="lb">시작하기</span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="shaft" d="M5 12h14"/><path class="head" d="M12 5l7 7-7 7"/></svg></button>
 ```
 
 ```css
 .T06 { padding-right: var(--space-3); }
-.T06 .ic { transition: transform var(--m-nudge-dur) var(--m-nudge-ease); }
-@media (hover: hover) and (pointer: fine) { .T06:hover .ic { transform: translateX(var(--m-nudge)); } }
 ```
 
 #### T07 로딩 → 성공
@@ -297,7 +436,7 @@
 눌러보기. 라벨 자리를 지키며(폭 고정) 스피너 → 체크가 그려진다.
 
 ```html
-<button type="button" class="mb T07" data-behavior="sequence" data-steps="is-loading:1400,is-done:1400"><span class="T07-label">결제하기</span><span class="T07-spin" aria-hidden="true"></span><span class="T07-ok" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="check" d="M20 6L9 17l-5-5"/></svg></span></button>
+<button type="button" class="mb T07" data-behavior="sequence" data-steps="is-loading:1400,is-done:1400"><span class="T07-label"><span class="lb">결제하기</span></span><span class="T07-spin" aria-hidden="true"></span><span class="T07-ok" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="check" d="M20 6L9 17l-5-5"/></svg></span></button>
 ```
 
 ```css
@@ -338,14 +477,14 @@ document.querySelectorAll('[data-behavior~="sequence"]:not([data-sequence-bound]
 
 #### T08 홀드 확인 (삭제)
 
-길게 누르면 1.2초 동안 채워지고 끝까지 누르면 확정. 떼면 세트 속도로 되돌아간다. 채움 안에 반전 글자 사본이 있어 채워진 쪽 글자도 보인다.
+길게 누르면 1.2초 동안 채워지고 끝까지 누르면 확정. 떼면 세트 속도로 되돌아간다. 채움 안에 반전 글자 사본이 있어 채워진 쪽 글자도 보인다. 채움형 호버(칠하기·스윕·차오름)는 누르는 동안(.is-holding) 걷혀 진행 채움이 보인다.
 
 ```html
-<button type="button" class="mb mb--line T08" data-behavior="hold" data-hold="1200"><span class="T08-fill" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg><span class="T08-t">길게 눌러 삭제</span></span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg><span class="T08-t">길게 눌러 삭제</span></button>
+<button type="button" class="mb mb--line T08" data-behavior="hold" data-hold="1200"><span class="T08-fill" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg><span class="T08-t">길게 눌러 삭제</span></span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg><span class="T08-t"><span class="lb">길게 눌러 삭제</span></span></button>
 ```
 
 ```css
-.T08-fill { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: var(--space-2); padding: 0 var(--space-4); color: var(--bg-1); background: var(--fg-1); clip-path: inset(0 100% 0 0); transition: clip-path var(--m-release-dur) var(--m-release-ease); }
+.T08-fill { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; gap: var(--space-2); padding: 0 var(--space-4); color: var(--bg-1); background: var(--fg-1); border-radius: inherit; clip-path: inset(0 100% 0 0); transition: clip-path var(--m-release-dur) var(--m-release-ease); }
 .T08 .ic, .T08-t { transition: color var(--m-hover-dur) var(--m-hover-ease); }
 .T08.is-holding .T08-fill { clip-path: inset(0); transition: clip-path 1200ms linear; }
 .T08.is-done .T08-fill { clip-path: inset(0); transition: none; }
@@ -383,7 +522,7 @@ document.querySelectorAll('[data-behavior~="hold"]:not([data-hold-bound])').forE
 
 #### T09 토글 (좋아요)
 
-누르면 채워지며 튀고 링이 퍼진다. 같은 세트면 같은 튕김.
+누르면 채워지며 튀고 링이 퍼진다. 같은 타이밍이면 같은 튕김. 켜진 상태는 채운 버튼으로 친다(스윕·차오름은 대비 레이어, 그리기는 바깥 링).
 
 ```html
 <button type="button" class="mb mb--line mb--icon T09" data-behavior="toggle" data-toggle aria-pressed="false" aria-label="좋아요"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-9-9C1.8 7.8 3.8 5 7 5c2 0 3.5 1.1 5 3 1.5-1.9 3-3 5-3 3.2 0 5.2 2.8 4 6-2 4.6-9 9-9 9z"/></svg><span class="T09-ring" aria-hidden="true"></span></button>
@@ -458,18 +597,20 @@ document.querySelectorAll('[data-behavior~="sequence"]:not([data-sequence-bound]
 
 #### T11 세그먼트 컨트롤
 
-선택 표시가 미끄러진다. 스프링 세트에서만 살짝 지나쳤다 돌아옴.
+선택 표시가 미끄러진다(스프링 타이밍에서만 살짝 지나쳤다 돌아옴). 호버는 선택 안 된 칸에만, 선택 표시(--fg-1 채움)와 헷갈리지 않게 상태 레이어 강도로 스타일을 따른다 — 칠하기는 밀림과 같은 상태 레이어.
 
 ```html
-<div class="T11" data-behavior="segmented" role="group" aria-label="기간"><span class="T11-ind" aria-hidden="true"></span><button type="button" data-seg>일</button><button type="button" data-seg>주</button><button type="button" data-seg>월</button></div>
+<div class="T11" data-behavior="segmented" role="group" aria-label="기간"><span class="T11-ind" aria-hidden="true"></span><button type="button" data-seg><span class="lb">일</span></button><button type="button" data-seg><span class="lb">주</span></button><button type="button" data-seg><span class="lb">월</span></button></div>
 ```
 
 ```css
 .T11 { position: relative; display: inline-flex; padding: var(--space-1); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-md); isolation: isolate; }
 .T11-ind { position: absolute; top: var(--space-1); bottom: var(--space-1); left: 0; width: var(--seg-w, 0px); transform: translateX(var(--seg-x, 0px)); background: var(--fg-1); border-radius: var(--radius-sm); z-index: -1; }
 .T11[data-ready] .T11-ind { transition: transform var(--m-move-dur) var(--m-move-ease), width var(--m-move-dur) var(--m-move-ease); }
-.T11 button { padding: var(--space-2) var(--space-3); font: inherit; font-size: var(--text-14); line-height: var(--lh-14); font-weight: var(--weight-medium); color: var(--fg-2); background: none; border: 0; border-radius: var(--radius-sm); cursor: pointer; transition: color var(--m-hover-dur) var(--m-hover-ease), transform var(--m-release-dur) var(--m-release-ease); }
+.T11 button { position: relative; padding: var(--space-2) var(--space-3); font: inherit; font-size: var(--text-14); line-height: var(--lh-14); font-weight: var(--weight-medium); color: var(--fg-2); background: none; border: 0; border-radius: var(--radius-sm); cursor: pointer; transition: color var(--m-hover-dur) var(--m-hover-ease), transform var(--m-release-dur) var(--m-release-ease); }
+.T11 button::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--fg-1); opacity: 0; pointer-events: none; transition: opacity var(--m-hover-dur) var(--m-hover-ease); }
 .T11 button[aria-pressed="true"] { color: var(--bg-1); }
+@media (hover: hover) and (pointer: fine) { .T11 button:not([aria-pressed="true"]):hover { color: var(--fg-1); } }
 .T11 button:active { transform: scale(var(--m-press-scale)); transition: color var(--m-hover-dur) var(--m-hover-ease), transform var(--m-press-dur) var(--m-press-ease); }
 ```
 
@@ -493,14 +634,16 @@ document.querySelectorAll('[data-behavior~="segmented"]:not([data-segmented-boun
 
 #### T12 스위치
 
-손잡이가 미끄러지고, 누르는 동안 옆으로 늘어난다(스쿼시).
+손잡이가 미끄러지고, 누르는 동안 옆으로 늘어난다(스쿼시). 트랙 호버가 스타일을 따른다 — 칠하기는 켜짐 표시와 헷갈리지 않게 밀림과 같은 상태 레이어.
 
 ```html
 <button type="button" class="T12" role="switch" aria-checked="false" aria-label="알림" data-behavior="toggle" data-toggle><span class="T12-thumb"></span></button>
 ```
 
 ```css
-.T12 { position: relative; box-sizing: content-box; width: calc(var(--space-7) - var(--space-1)); height: var(--space-5); padding: 0; background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: var(--radius-pill); cursor: pointer; transition: background-color var(--m-hover-dur) var(--m-hover-ease), border-color var(--m-hover-dur) var(--m-hover-ease); }
+.T12 { position: relative; isolation: isolate; box-sizing: content-box; width: calc(var(--space-7) - var(--space-1)); height: var(--space-5); padding: 0; background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: var(--radius-pill); cursor: pointer; transition: background-color var(--m-hover-dur) var(--m-hover-ease), border-color var(--m-hover-dur) var(--m-hover-ease); }
+.T12::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--fg-1); opacity: 0; pointer-events: none; transition: opacity var(--m-hover-dur) var(--m-hover-ease); }
+.T12.is-on::before { background: var(--bg-1); }
 .T12-thumb { position: absolute; top: 2px; left: 2px; width: calc(var(--space-4) + var(--space-1)); height: calc(var(--space-4) + var(--space-1)); background: var(--fg-1); border-radius: var(--radius-pill); transition: transform var(--m-move-dur) var(--m-move-ease), width var(--m-press-dur) var(--m-press-ease), background-color var(--m-hover-dur) var(--m-hover-ease); }
 .T12:active .T12-thumb { width: var(--space-5); }
 .T12.is-on { background: var(--fg-1); border-color: var(--fg-1); }
@@ -537,12 +680,13 @@ document.querySelectorAll('[data-behavior~="toggle"]:not([data-toggle-bound])').
 .T13-items { display: flex; gap: var(--space-1); }
 .T13-items .mb { width: var(--space-6); height: var(--space-6); }
 .T13-items .ic { width: var(--space-4); height: var(--space-4); }
-.T13-items .mb { --_bg: var(--bg-1); opacity: 0; visibility: hidden; pointer-events: none; transform: translateX(var(--space-2)) scale(var(--m-enter-scale)); transition: opacity var(--m-exit-dur) var(--m-exit-ease), transform var(--m-exit-dur) var(--m-exit-ease), visibility 0s var(--m-exit-dur); }
-.T13.is-open .T13-items .mb { opacity: 1; visibility: visible; pointer-events: auto; transform: none; transition: opacity var(--m-enter-dur) var(--m-enter-ease), transform var(--m-enter-dur) var(--m-enter-ease), visibility 0s; }
-.T13.is-open .T13-items .mb:nth-child(3) { transition-delay: 0ms, 0ms, 0s; }
-.T13.is-open .T13-items .mb:nth-child(2) { transition-delay: 30ms, 30ms, 0s; }
-.T13.is-open .T13-items .mb:nth-child(1) { transition-delay: 60ms, 60ms, 0s; }
-.T13.is-open .T13-items .mb:active { transform: scale(var(--m-press-scale)); transition: opacity var(--m-enter-dur) var(--m-enter-ease), transform var(--m-press-dur) var(--m-press-ease), visibility 0s; }
+/* 항목 전환 목록이 BASE 를 덮으므로 색·테두리·그림자 전환도 같이 적는다 (스타일 호버가 끊기지 않게) */
+.T13-items .mb { --_bg: var(--bg-1); opacity: 0; visibility: hidden; pointer-events: none; transform: translateX(var(--space-2)) scale(var(--m-enter-scale)); transition: opacity var(--m-exit-dur) var(--m-exit-ease), transform var(--m-exit-dur) var(--m-exit-ease), visibility 0s var(--m-exit-dur), background-color var(--m-hover-dur) var(--m-hover-ease), color var(--m-hover-dur) var(--m-hover-ease), border-color var(--m-hover-dur) var(--m-hover-ease), box-shadow var(--m-focus-dur) var(--m-hover-ease); }
+.T13.is-open .T13-items .mb { opacity: 1; visibility: visible; pointer-events: auto; transform: none; transition: opacity var(--m-enter-dur) var(--m-enter-ease), transform var(--m-enter-dur) var(--m-enter-ease), visibility 0s, background-color var(--m-hover-dur) var(--m-hover-ease), color var(--m-hover-dur) var(--m-hover-ease), border-color var(--m-hover-dur) var(--m-hover-ease), box-shadow var(--m-focus-dur) var(--m-hover-ease); }
+.T13.is-open .T13-items .mb:nth-child(3) { transition-delay: 0ms, 0ms, 0s, 0s, 0s, 0s, 0s; }
+.T13.is-open .T13-items .mb:nth-child(2) { transition-delay: 30ms, 30ms, 0s, 0s, 0s, 0s, 0s; }
+.T13.is-open .T13-items .mb:nth-child(1) { transition-delay: 60ms, 60ms, 0s, 0s, 0s, 0s, 0s; }
+.T13.is-open .T13-items .mb:active { transform: scale(var(--m-press-scale)); transition: opacity var(--m-enter-dur) var(--m-enter-ease), transform var(--m-press-dur) var(--m-press-ease), visibility 0s, background-color var(--m-hover-dur) var(--m-hover-ease), color var(--m-hover-dur) var(--m-hover-ease), border-color var(--m-hover-dur) var(--m-hover-ease), box-shadow var(--m-focus-dur) var(--m-hover-ease); }
 .T13-fab { width: var(--space-7); height: var(--space-7); }
 .T13-fab .ic { transition: transform var(--m-move-dur) var(--m-move-ease); }
 .T13.is-open .T13-fab .ic { transform: rotate(45deg); }
@@ -575,7 +719,7 @@ document.querySelectorAll('[data-behavior~="menu"]:not([data-menu-bound])').forE
 캐럿이 뒤집히고 메뉴가 트리거 쪽에서 세트의 등장 모션으로 열린다.
 
 ```html
-<div class="T14" data-behavior="menu"><button type="button" class="mb mb--line T14-trig" data-menu-trigger aria-expanded="false">정렬 <svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="T14-pop"><button type="button">최신순</button><button type="button">인기순</button><button type="button">가격순</button></div></div>
+<div class="T14" data-behavior="menu"><button type="button" class="mb mb--line T14-trig" data-menu-trigger aria-expanded="false"><span class="lb">정렬</span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="T14-pop"><button type="button">최신순</button><button type="button">인기순</button><button type="button">가격순</button></div></div>
 ```
 
 ```css
@@ -612,20 +756,15 @@ document.querySelectorAll('[data-behavior~="menu"]:not([data-menu-bound])').forE
 
 #### T15 페이지네이션 (카운터)
 
-화살표는 T05와 같은 밀림, 숫자는 넘기는 방향에서 들어온다.
+숫자는 넘기는 방향에서 들어온다. 화살표는 밀림 열에서만 T05와 같이 밀린다. 끝 페이지에서 비활성된 화살표는 어느 스타일에서도 호버 효과가 없다.
 
 ```html
-<nav class="T15" data-behavior="pager" data-total="12" aria-label="페이지"><button type="button" class="mb mb--line mb--icon T15-b" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><span class="T15-label" data-label aria-live="polite"></span><button type="button" class="mb mb--line mb--icon T15-b" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></nav>
+<nav class="T15" data-behavior="pager" data-total="12" aria-label="페이지"><button type="button" class="mb mb--line mb--icon T15-b" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><span class="T15-label" data-label aria-live="polite"></span><button type="button" class="mb mb--line mb--icon T15-b" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></nav>
 ```
 
 ```css
 .T15 { display: flex; align-items: center; gap: var(--space-2); }
 .T15-label { min-width: var(--space-8); font-family: var(--font-mono); font-size: var(--text-14); line-height: var(--lh-14); text-align: center; color: var(--fg-1); }
-.T15 .ic { transition: transform var(--m-nudge-dur) var(--m-nudge-ease); }
-@media (hover: hover) and (pointer: fine) {
-  .T15-b[data-prev]:hover:not(:disabled) .ic { transform: translateX(calc(var(--m-nudge) * -1)); }
-  .T15-b[data-next]:hover:not(:disabled) .ic { transform: translateX(var(--m-nudge)); }
-}
 .T15[data-dir="next"] .T15-label.is-anim { animation: T15-in-next var(--m-move-dur) var(--m-move-ease); }
 .T15[data-dir="prev"] .T15-label.is-anim { animation: T15-in-prev var(--m-move-dur) var(--m-move-ease); }
 @keyframes T15-in-next { from { opacity: 0; transform: translateX(var(--space-2)); } }
@@ -757,7 +896,7 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 | 용도 | 범용 캐러셀 · 쉽게 리컬러 |
 
 ```html
-<div class="A-01" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+<div class="A-01" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 ```
 
 ```css
@@ -850,7 +989,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 범용 슬라이더 · 눈에 안 띄는 화살표 |
 
 ```html
-<div class="A-02" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+<div class="A-02" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 ```
 
 ```css
@@ -945,7 +1084,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 브랜드 갤러리 · 미니멀 갤러리 |
 
 ```html
-<div class="A-03" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+<div class="A-03" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 ```
 
 ```css
@@ -1136,7 +1275,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 사진 갤러리 · 터치 우선 UI |
 
 ```html
-<div class="A-05" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+<div class="A-05" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 ```
 
 ```css
@@ -1327,7 +1466,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 단순 콘텐츠 행 |
 
 ```html
-<div class="A-07" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><div class="nav"><button type="button" class="bt pv" data-prev aria-label="이전">‹</button><button type="button" class="bt nx" data-next aria-label="다음">›</button></div></div>
+<div class="A-07" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><div class="nav"><button type="button" class="bt pv" data-prev aria-label="이전"><span class="g">‹</span></button><button type="button" class="bt nx" data-next aria-label="다음"><span class="g">›</span></button></div></div>
 ```
 
 ```css
@@ -1344,6 +1483,10 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 .A-07 .bt { padding: 4px 7px; border-radius: 3px; font-size: var(--text-14); line-height: 1; background: var(--border-strong); color: var(--bg-1); }
 .A-07 .bt:hover:not(:disabled) { background: var(--fg-3); }
 .A-07 .bt:disabled { opacity: .5; }
+/* 광학 보정: ‹ › 글리프 잉크 폭 ≈ .3em, 1/6 ≈ .05em 만큼 가리키는 쪽으로 (빈 쪽이 가볍게 보이는 것 상쇄) */
+.A-07 .g { display: inline-block; }
+.A-07 .pv .g { translate: calc(var(--optical, 1) * -0.05em) 0; }
+.A-07 .nx .g { translate: calc(var(--optical, 1) * 0.05em) 0; }
 ```
 
 ```js
@@ -1420,7 +1563,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 에디토리얼/타이포 중심 레이아웃 |
 
 ```html
-<div class="A-08" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드">«</button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드">»</button></div>
+<div class="A-08" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><span class="g">«</span></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><span class="g">»</span></button></div>
 ```
 
 ```css
@@ -1438,6 +1581,10 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 .A-08 .nx { right: 2px; }
 .A-08 .bt:hover:not(:disabled), .A-08 .bt:focus-visible { color: var(--fg-1); }
 .A-08 .bt:disabled { opacity: .25; }
+/* 광학 보정: « » 글리프 잉크 폭 ≈ .6em, 1/6 ≈ .1em 만큼 가리키는 쪽으로 */
+.A-08 .g { display: inline-block; }
+.A-08 .pv .g { translate: calc(var(--optical, 1) * -0.1em) 0; }
+.A-08 .nx .g { translate: calc(var(--optical, 1) * 0.1em) 0; }
 ```
 
 ```js
@@ -1514,7 +1661,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 풀블리드 이미지 슬라이더 |
 
 ```html
-<div class="A-09" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+<div class="A-09" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 ```
 
 ```css
@@ -1607,7 +1754,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 콘텐츠 캐러셀 · 가장자리가 깨끗해야 하는 곳 |
 
 ```html
-<div class="A-10" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><div class="ctl"><div class="arrows"><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div><div data-dots></div></div></div>
+<div class="A-10" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><div class="ctl"><div class="arrows"><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div><div data-dots></div></div></div>
 ```
 
 ```css
@@ -1895,7 +2042,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 히어로 배너 · 큰 터치 영역이 필요한 곳 |
 
 ```html
-<div class="A-13" data-behavior="carousel" data-loop><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+<div class="A-13" data-behavior="carousel" data-loop><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 ```
 
 ```css
@@ -1988,7 +2135,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 노코드 히어로 슬라이더 |
 
 ```html
-<div class="A-14" data-behavior="carousel" data-loop><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+<div class="A-14" data-behavior="carousel" data-loop><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 ```
 
 ```css
@@ -2082,7 +2229,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | Tailwind 히어로 캐러셀(사진 위) |
 
 ```html
-<div class="A-15" data-behavior="carousel" data-loop><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><span class="pl"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></span></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><span class="pl"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span></button></div>
+<div class="A-15" data-behavior="carousel" data-loop><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><span class="pl"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></span></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><span class="pl"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></span></button></div>
 ```
 
 ```css
@@ -2178,7 +2325,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | JS 없는 CSS 전용 캐러셀 |
 
 ```html
-<div class="A-16" data-behavior="carousel" data-loop><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><div class="nav"><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드">❮</button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드">❯</button></div></div>
+<div class="A-16" data-behavior="carousel" data-loop><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><div class="nav"><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><span class="g">❮</span></button><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><span class="g">❯</span></button></div></div>
 ```
 
 ```css
@@ -2195,6 +2342,10 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 .A-16 .bt:hover { background: color-mix(in srgb, var(--bg-2) 93%, var(--fg-1)); }
 .A-16 .bt:active { translate: 0 .5px; box-shadow: none; }
 .A-16 .bt:focus-visible { outline: 2px solid var(--fg-1); outline-offset: 2px; }
+/* 광학 보정: ❮ ❯ 굵은 꺾쇠 잉크 폭 ≈ .4em, 1/6 ≈ .07em 만큼 가리키는 쪽으로. 버튼의 :active translate 와 겹치지 않게 글리프 span 에만 */
+.A-16 .g { display: inline-block; }
+.A-16 .pv .g { translate: calc(var(--optical, 1) * -0.07em) 0; }
+.A-16 .nx .g { translate: calc(var(--optical, 1) * 0.07em) 0; }
 ```
 
 ```js
@@ -2367,7 +2518,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 동작 정확성을 기본으로 원하는 디자인 시스템 |
 
 ```html
-<div class="A-18" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><div class="ctl"><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><div data-dots></div><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div></div>
+<div class="A-18" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><div class="ctl"><button type="button" class="bt pv" data-prev aria-label="이전 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><div data-dots></div><button type="button" class="bt nx" data-next aria-label="다음 슬라이드"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div></div>
 ```
 
 ```css
@@ -2464,7 +2615,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 칩/탭/필터 바 |
 
 ```html
-<div class="A-19" data-behavior="scroller replay" data-step="0.8"><div class="bar"><button type="button" class="bt" data-prev data-replay aria-label="왼쪽으로 스크롤"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><div class="tabs" data-scroller tabindex="0" aria-label="탭 목록"><button type="button" class="chip on">홈</button><button type="button" class="chip">인기</button><button type="button" class="chip">신상품</button><button type="button" class="chip">추천</button><button type="button" class="chip">할인</button><button type="button" class="chip">브랜드</button><button type="button" class="chip">이벤트</button><button type="button" class="chip">리뷰</button></div><button type="button" class="bt" data-next data-replay aria-label="오른쪽으로 스크롤"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div></div>
+<div class="A-19" data-behavior="scroller replay" data-step="0.8"><div class="bar"><button type="button" class="bt" data-prev data-replay aria-label="왼쪽으로 스크롤"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><div class="tabs" data-scroller tabindex="0" aria-label="탭 목록"><button type="button" class="chip on">홈</button><button type="button" class="chip">인기</button><button type="button" class="chip">신상품</button><button type="button" class="chip">추천</button><button type="button" class="chip">할인</button><button type="button" class="chip">브랜드</button><button type="button" class="chip">이벤트</button><button type="button" class="chip">리뷰</button></div><button type="button" class="bt" data-next data-replay aria-label="오른쪽으로 스크롤"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div></div>
 ```
 
 ```css
@@ -2570,7 +2721,7 @@ document.querySelectorAll('[data-behavior~="replay"]:not([data-replay-bound])').
 | 용도 | 프리미엄 제품 갤러리 |
 
 ```html
-<div class="A-20" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+<div class="A-20" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 ```
 
 ```css
@@ -2674,7 +2825,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 긴 가로 선반(shelf) |
 
 ```html
-<div class="A-21" data-behavior="carousel" data-visible="2" data-step="50"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div><div class="bar"><button type="button" class="bt pv" data-prev aria-label="이전 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div></div>
+<div class="A-21" data-behavior="carousel" data-visible="2" data-step="50"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div><div class="bar"><button type="button" class="bt pv" data-prev aria-label="이전 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div></div>
 ```
 
 ```css
@@ -2769,7 +2920,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 어두운 UI의 미디어 행 |
 
 ```html
-<div class="A-22" data-behavior="carousel" data-visible="2" data-step="50"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div><div class="pn pn-prev"><button type="button" class="bt pv" data-prev aria-label="이전 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button></div><div class="pn pn-next"><button type="button" class="bt nx" data-next aria-label="다음 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div></div>
+<div class="A-22" data-behavior="carousel" data-visible="2" data-step="50"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div><div class="pn pn-prev"><button type="button" class="bt pv" data-prev aria-label="이전 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button></div><div class="pn pn-next"><button type="button" class="bt nx" data-next aria-label="다음 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div></div>
 ```
 
 ```css
@@ -2867,7 +3018,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 제목이 있는 탐색 행 |
 
 ```html
-<div class="A-23" data-behavior="carousel" data-visible="2" data-step="50"><div class="hd"><span class="ttl">부산 인기 숙소</span><div class="pair"><button type="button" class="bt pv" data-prev aria-label="이전 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div></div><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div></div>
+<div class="A-23" data-behavior="carousel" data-visible="2" data-step="50"><div class="hd"><span class="ttl">부산 인기 숙소</span><div class="pair"><button type="button" class="bt pv" data-prev aria-label="이전 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div></div><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div></div>
 ```
 
 ```css
@@ -2966,7 +3117,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 카드 안 썸네일 캐러셀 |
 
 ```html
-<div class="A-24" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><div class="wrap"><button type="button" class="bt pv" data-prev aria-label="이전 사진"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 사진: 해운대 숙소"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div></div>
+<div class="A-24" data-behavior="carousel"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div></div></div><div class="wrap"><button type="button" class="bt pv" data-prev aria-label="이전 사진"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 사진: 해운대 숙소"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div></div>
 ```
 
 ```css
@@ -3063,7 +3214,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 흰 배경의 카드 행 |
 
 ```html
-<div class="A-25" data-behavior="carousel" data-visible="2" data-step="50"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+<div class="A-25" data-behavior="carousel" data-visible="2" data-step="50"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 항목"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 ```
 
 ```css
@@ -3159,7 +3310,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 필터/태그 칩 행 |
 
 ```html
-<div class="A-26" data-behavior="scroller" data-step="0.8"><div class="bar"><div class="chips" data-scroller tabindex="0" aria-label="칩 목록"><button type="button" class="chip on">전체</button><button type="button" class="chip">UI 디자인</button><button type="button" class="chip">모션</button><button type="button" class="chip">아이콘</button><button type="button" class="chip">타이포</button><button type="button" class="chip">컬러</button><button type="button" class="chip">프로토타입</button><button type="button" class="chip">접근성</button><button type="button" class="chip">최근 업로드</button></div><div class="ar ar-p"><button type="button" class="bt" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button></div><div class="ar ar-n"><button type="button" class="bt" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div></div></div>
+<div class="A-26" data-behavior="scroller" data-step="0.8"><div class="bar"><div class="chips" data-scroller tabindex="0" aria-label="칩 목록"><button type="button" class="chip on">전체</button><button type="button" class="chip">UI 디자인</button><button type="button" class="chip">모션</button><button type="button" class="chip">아이콘</button><button type="button" class="chip">타이포</button><button type="button" class="chip">컬러</button><button type="button" class="chip">프로토타입</button><button type="button" class="chip">접근성</button><button type="button" class="chip">최근 업로드</button></div><div class="ar ar-p"><button type="button" class="bt" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button></div><div class="ar ar-n"><button type="button" class="bt" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div></div></div>
 ```
 
 ```css
@@ -3254,7 +3405,7 @@ document.querySelectorAll('[data-behavior~="scroller"]:not([data-scroller-bound]
 | 용도 | 앱/상품 선반 |
 
 ```html
-<div class="A-27" data-behavior="carousel" data-visible="2" data-step="50"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전으로 스크롤"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음으로 스크롤"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+<div class="A-27" data-behavior="carousel" data-visible="2" data-step="50"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전으로 스크롤"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음으로 스크롤"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 ```
 
 ```css
@@ -3350,7 +3501,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 밀집된 그리드 선반 |
 
 ```html
-<div class="A-28" data-behavior="carousel" data-visible="3" data-step="33.333"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div><div class="sl">6</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2l-6 10 6 10" stroke-width="1.5"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2l-6 10 6 10" stroke-width="1.5"/></svg></button></div>
+<div class="A-28" data-behavior="carousel" data-visible="3" data-step="33.333"><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div><div class="sl">6</div></div></div><button type="button" class="bt pv" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 2l-6 10 6 10" stroke-width="1.5"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 2l-6 10 6 10" stroke-width="1.5"/></g></svg></button></div>
 ```
 
 ```css
@@ -3449,7 +3600,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 | 용도 | 커머스 상품 레일 |
 
 ```html
-<div class="A-29" data-behavior="carousel" data-visible="2" data-step="50"><div class="hd"><span class="ttl">이번 주 인기</span><div class="pair"><button type="button" class="bt pv" data-prev aria-label="이전 상품"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="bt nx" data-next aria-label="다음 상품"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div></div><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div></div>
+<div class="A-29" data-behavior="carousel" data-visible="2" data-step="50"><div class="hd"><span class="ttl">이번 주 인기</span><div class="pair"><button type="button" class="bt pv" data-prev aria-label="이전 상품"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="bt nx" data-next aria-label="다음 상품"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div></div><div class="vp"><div data-track><div class="sl">1</div><div class="sl">2</div><div class="sl">3</div><div class="sl">4</div><div class="sl">5</div></div></div></div>
 ```
 
 ```css
@@ -3555,9 +3706,9 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 ```html
 <nav class="B-01" aria-label="페이지네이션" data-behavior="pager" data-total="3" data-start="1">
   <button type="button" data-first aria-label="첫 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 18l-6-6 6-6"/><path d="M7 6v12"/></svg></button>
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
   <button type="button" data-last aria-label="마지막 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18l6-6-6-6"/><path d="M17 6v12"/></svg></button>
 </nav>
 ```
@@ -3696,8 +3847,8 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
   <span class="rows">행 수: <b>10</b><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
   <span class="range"><span data-label></span> / 50</span>
   <span class="btns">
-    <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+    <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
   </span>
 </nav>
 ```
@@ -3837,9 +3988,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 ```html
 <nav class="B-03" aria-label="페이지" data-behavior="pager" data-labels="1 – 10,11 – 20,21 – 30,31 – 40,41 – 50" data-start="1">
   <button type="button" data-first aria-label="첫 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 18l-6-6 6-6"/><path d="M7 6v12"/></svg></button>
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <span class="range"><span data-label></span> / 50</span>
-  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
   <button type="button" data-last aria-label="마지막 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18l6-6-6-6"/><path d="M17 6v12"/></svg></button>
 </nav>
 ```
@@ -3977,9 +4128,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-04" aria-label="페이지네이션" data-behavior="pager" data-total="4" data-start="1">
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </nav>
 ```
 
@@ -4115,10 +4266,10 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-05" aria-label="페이지네이션" data-behavior="pager" data-total="10" data-jump="5" data-start="4">
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
-  <template data-gap><span class="ell">•••</span><span class="jmp l"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></svg></span><span class="jmp r"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></svg></span></template>
+  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
+  <template data-gap><span class="ell">•••</span><span class="jmp l"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1.14 0)"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></g></svg></span><span class="jmp r"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1.14 0)"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></g></svg></span></template>
 </nav>
 ```
 
@@ -4259,9 +4410,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-06" aria-label="페이지네이션" data-behavior="pager" data-total="5" data-start="1">
-  <button type="button" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </nav>
 ```
 
@@ -4398,8 +4549,8 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 ```html
 <nav class="B-07" aria-label="페이지" data-behavior="pager" data-labels="페이지 1,페이지 2,페이지 3,페이지 4,페이지 5" data-start="1">
   <span class="group">
-    <button type="button" data-prev aria-label="이전"><span class="c"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></span></button>
-    <button type="button" data-next aria-label="다음"><span class="c"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span></button>
+    <button type="button" data-prev aria-label="이전"><span class="c"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></span></button>
+    <button type="button" data-next aria-label="다음"><span class="c"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></span></button>
   </span>
   <span class="lab" data-label></span>
 </nav>
@@ -4541,9 +4692,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-08" aria-label="페이지네이션" data-behavior="pager" data-total="3" data-start="1">
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>이전</span></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg><span>이전</span></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음 페이지"><span>다음</span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-next aria-label="다음 페이지"><span>다음</span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </nav>
 ```
 
@@ -4680,8 +4831,8 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 <nav class="B-09" aria-label="페이지" data-behavior="pager" data-labels="1–10,11–20,21–30,31–40,41–50" data-start="1">
   <span class="per"><b>10</b><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
   <span class="range" data-label></span>
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </nav>
 ```
 
@@ -4817,9 +4968,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-10" aria-label="페이지네이션" data-behavior="pager" data-total="4" data-start="1">
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6v12l-8-6z" fill="currentColor"/></svg></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-0.33 0)"><path d="M15 6v12l-8-6z" fill="currentColor"/></g></svg></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6v12l8-6z" fill="currentColor"/></svg></button>
+  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(0.33 0)"><path d="M9 6v12l8-6z" fill="currentColor"/></g></svg></button>
 </nav>
 ```
 
@@ -4957,10 +5108,10 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-11" aria-label="페이지" data-behavior="pager" data-labels="1,2,3,4,5" data-start="1">
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
   <span class="field" data-label></span>
   <span class="of">/ 5 페이지</span>
-  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </nav>
 ```
 
@@ -5233,9 +5384,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-13" aria-label="페이지" data-behavior="pager" data-total="10" data-start="1">
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <span class="txt" data-label></span>
-  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </nav>
 ```
 
@@ -5369,11 +5520,11 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-14" aria-label="페이지네이션" data-behavior="pager" data-total="3" data-start="1">
-  <button type="button" data-first aria-label="첫 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></svg></button>
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" data-first aria-label="첫 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1.14 0)"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></g></svg></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
-  <button type="button" data-last aria-label="마지막 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></svg></button>
+  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
+  <button type="button" data-last aria-label="마지막 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1.14 0)"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></g></svg></button>
 </nav>
 ```
 
@@ -5509,9 +5660,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-15" aria-label="페이지네이션" data-behavior="pager" data-total="3" data-start="1">
-  <button type="button" data-prev aria-label="이전 페이지" class="edge"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>이전</span></button>
+  <button type="button" data-prev aria-label="이전 페이지" class="edge"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg><span>이전</span></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음 페이지" class="edge"><span>다음</span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-next aria-label="다음 페이지" class="edge"><span>다음</span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </nav>
 ```
 
@@ -5650,8 +5801,8 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
   <span class="sum" data-label></span>
   <div class="bar">
     <span class="per">10 / 페이지<svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
-    <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+    <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
   </div>
 </nav>
 ```
@@ -5791,9 +5942,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-17" aria-label="페이지네이션" data-behavior="pager" data-total="4" data-start="1">
-  <button type="button" data-prev aria-label="이전"><span aria-hidden="true">&laquo;</span></button>
+  <button type="button" data-prev aria-label="이전"><span class="g" aria-hidden="true">&laquo;</span></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음"><span aria-hidden="true">&raquo;</span></button>
+  <button type="button" data-next aria-label="다음"><span class="g" aria-hidden="true">&raquo;</span></button>
 </nav>
 ```
 
@@ -5807,6 +5958,10 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 .B-17 button[aria-current] { z-index: 3; color: var(--bg-1); background: var(--fg-1); border-color: var(--fg-1); }
 .B-17 button:focus-visible { z-index: 3; outline: 0; box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--fg-1) 25%, transparent); }
 .B-17 button:disabled { color: var(--fg-3); background: var(--bg-2); cursor: default; }
+/* 광학 보정: « » 글리프 잉크 폭 ≈ .6em, 1/6 ≈ .1em 만큼 가리키는 쪽으로 (span 만 움직여 셀 테두리는 그대로) */
+.B-17 .g { display: inline-block; }
+.B-17 [data-prev] .g { translate: calc(var(--optical, 1) * -0.1em) 0; }
+.B-17 [data-next] .g { translate: calc(var(--optical, 1) * 0.1em) 0; }
 ```
 
 ```js
@@ -6211,9 +6366,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 ```html
 <nav class="B-20" aria-label="페이지">
   <div class="join" data-behavior="pager" data-labels="페이지 21,페이지 22,페이지 23,페이지 24" data-start="1">
-    <button type="button" data-prev aria-label="이전 페이지">&laquo;</button>
+    <button type="button" data-prev aria-label="이전 페이지"><span class="g">&laquo;</span></button>
     <span class="mid" data-label></span>
-    <button type="button" data-next aria-label="다음 페이지">&raquo;</button>
+    <button type="button" data-next aria-label="다음 페이지"><span class="g">&raquo;</span></button>
   </div>
   <div class="two" data-behavior="pager" data-total="4" data-start="1">
     <button type="button" data-prev>이전 페이지</button>
@@ -6237,6 +6392,10 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 .B-20 button:active { translate: 0 .5px; box-shadow: none; }
 .B-20 button:focus-visible { outline: 2px solid var(--fg-1); outline-offset: 2px; }
 .B-20 button:disabled { opacity: .4; cursor: default; box-shadow: none; }
+/* 광학 보정: « » 글리프 잉크 폭 ≈ .6em, 1/6 ≈ .1em 만큼 가리키는 쪽으로 */
+.B-20 .g { display: inline-block; }
+.B-20 .join [data-prev] .g { translate: calc(var(--optical, 1) * -0.1em) 0; }
+.B-20 .join [data-next] .g { translate: calc(var(--optical, 1) * 0.1em) 0; }
 ```
 
 ```js
@@ -6359,10 +6518,10 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-21" aria-label="페이지네이션" data-behavior="pager" data-total="10" data-jump="5" data-start="4">
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
-  <template data-gap><span class="dots"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg></span><span class="jmp l"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></svg></span><span class="jmp r"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></svg></span></template>
+  <button type="button" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
+  <template data-gap><span class="dots"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg></span><span class="jmp l"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1.14 0)"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></g></svg></span><span class="jmp r"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1.14 0)"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></g></svg></span></template>
 </nav>
 ```
 
@@ -6646,9 +6805,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-23" aria-label="페이지네이션" data-behavior="pager" data-total="3" data-start="1">
-  <button type="button" data-prev aria-label="이전" class="btn_prev"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" data-prev aria-label="이전" class="btn_prev"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음" class="btn_next"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" data-next aria-label="다음" class="btn_next"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
 </nav>
 ```
 
@@ -6927,9 +7086,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 
 ```html
 <nav class="B-25" aria-label="페이지네이션" data-behavior="pager" data-total="3" data-start="1">
-  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>이전</span></button>
+  <button type="button" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg><span>이전</span></button>
   <span data-pages></span>
-  <button type="button" data-next aria-label="다음 페이지"><span>다음</span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-next aria-label="다음 페이지"><span>다음</span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </nav>
 ```
 
@@ -7355,8 +7514,8 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 ```html
 <div class="C-01">
   <button type="button" class="b-back" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="shaft" d="M19 12H5"/><path class="head" d="M12 19l-7-7 7-7"/></svg></button>
-  <button type="button" class="b-chev" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
-  <button type="button" class="b-big" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h8V5l8 7-8 7v-4H4z" fill="currentColor"/></svg></button>
+  <button type="button" class="b-chev" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
+  <button type="button" class="b-big" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(0.94 0)"><path d="M4 9h8V5l8 7-8 7v-4H4z" fill="currentColor"/></g></svg></button>
   <button type="button" class="b-narrow" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="shaft" d="M5 12h14"/><path class="head" d="M15 8l4 4-4 4"/></svg></button>
   <span class="cap">−3px</span><span class="cap">2px</span><span class="cap">3px</span><span class="cap">4px</span>
 </div>
@@ -7751,7 +7910,7 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 | 용도 | 스와이프 힌트 · 다음 CTA |
 
 ```html
-<div class="C-14"><button type="button">다음<span class="arw" aria-hidden="true"><svg class="ic" viewBox="0 0 66 43" width="40" height="26" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="three" d="M5 5l16 16.5L5 38"/><path class="two" d="M25 5l16 16.5L25 38"/><path class="one" d="M45 5l16 16.5L45 38"/></svg></span></button></div>
+<div class="C-14"><button type="button">다음<span class="arw" aria-hidden="true"><svg class="ic" viewBox="0 0 66 43" width="40" height="26" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(3.78 0)"><path class="three" d="M5 5l16 16.5L5 38"/><path class="two" d="M25 5l16 16.5L25 38"/><path class="one" d="M45 5l16 16.5L45 38"/></g></svg></span></button></div>
 ```
 
 ```css
@@ -7799,6 +7958,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 .C-15 .ar { position: absolute; top: 35%; width: 11%; height: 30%; background: var(--fg-3); transition: .2s; }
 .C-15 .ar-l { left: -13.5%; clip-path: polygon(100% 0, 100% 100%, 0 50%); }
 .C-15 .ar-r { left: 102%; clip-path: polygon(100% 49%, 0 0, 0 100%); }
+/* 광학 보정: 삼각형 무게중심은 평평한 쪽에서 폭의 1/3 → 폭의 1/6(translate % 는 자기 폭 기준) 만큼 꼭짓점 쪽으로. 왕복은 transform 이라 겹치지 않는다 */
+.C-15 .ar-l { translate: calc(var(--optical, 1) * -16.667%) 0; }
+.C-15 .ar-r { translate: calc(var(--optical, 1) * 16.667%) 0; }
 .C-15 button:is(:hover, :focus-visible) .clip { --c15: var(--fg-1); }
 .C-15 button:is(:hover, :focus-visible) .ar-r { left: -15%; background: var(--fg-1); animation: C-15-r .6s ease-in-out both infinite alternate; }
 .C-15 button:is(:hover, :focus-visible) .ar-l { left: 103%; background: var(--fg-1); animation: C-15-l .6s ease-in-out both infinite alternate; }
@@ -7869,6 +8031,9 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 .C-17 .nav::before { content: ""; position: absolute; inset: 0; background: var(--bg-1); border-radius: 50%; opacity: 0; transform: scale(.9); transition: transform .3s, opacity .3s; }
 .C-17 .iw { position: relative; display: block; width: 80%; height: 80%; margin: 10% 0 0 10%; }
 .C-17 .next .iw { transform: rotate(180deg); }
+/* 광학 보정: 셰브론 가로 폭 ≈ 10px(막대 20px × sin30°), 1/6 ≈ 1.7px 를 가리키는 쪽으로. translate 는 부모 좌표라 next 의 180° 회전과 무관하게 부호를 직접 준다 */
+.C-17 .prev .iw { translate: calc(var(--optical, 1) * -1.7px) 0; }
+.C-17 .next .iw { translate: calc(var(--optical, 1) * 1.7px) 0; }
 .C-17 .iw::before, .C-17 .iw::after { content: ""; position: absolute; left: 25%; width: 3px; height: 50%; background: var(--bg-1); backface-visibility: hidden; transition: transform .3s, background-color .3s; }
 .C-17 .iw::before { transform: translateX(-50%) rotate(30deg); transform-origin: 0 100%; }
 .C-17 .iw::after { top: 50%; transform: translateX(-50%) rotate(-30deg); transform-origin: 0 0; }
@@ -7973,6 +8138,9 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 .C-18 .next::before, .C-18 .next .iw::before { transform: translateX(-50%) rotate(135deg); transform-origin: 50% 0%; }
 .C-18 .nav::after, .C-18 .iw::after { transform: translateX(-50%) rotate(-45deg); transform-origin: 0 0; }
 .C-18 .next::after, .C-18 .next .iw::after { transform: translateX(-50%) rotate(45deg); transform-origin: 100% 0%; }
+/* 광학 보정: 팔 40px × sin45° ≈ 가로 폭 28px, 1/6 ≈ 4.7px 를 가리키는 쪽으로 (팔 회색·덧칠 모두, 라벨은 그대로) */
+.C-18 .prev::before, .C-18 .prev::after, .C-18 .prev .iw { translate: calc(var(--optical, 1) * -4.7px) 0; }
+.C-18 .next::before, .C-18 .next::after, .C-18 .next .iw { translate: calc(var(--optical, 1) * 4.7px) 0; }
 .C-18 .lb { position: absolute; top: 50%; font-size: var(--text-14); line-height: var(--lh-14); font-weight: var(--weight-regular); white-space: nowrap; color: var(--fg-1); opacity: 0; transition: transform .3s, opacity .3s; }
 .C-18 .prev .lb { left: 100%; transform: translateY(-50%) translateX(-50%); }
 .C-18 .next .lb { right: 100%; transform: translateY(-50%) translateX(50%); }
@@ -8069,6 +8237,9 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 .C-19 button { position: relative; width: 50px; height: 60px; padding: 0; background: none; border: 0; cursor: pointer; transition: transform .1s; }
 .C-19 .g { position: absolute; inset: 0; }
 .C-19 .prev .g { transform: scaleX(-1); }
+/* 광학 보정: 팔 50px × sin45° ≈ 가로 폭 35px, 1/6 ≈ 5.9px 를 가리키는 쪽으로. prev 는 scaleX(-1) 이지만 translate 는 부모 좌표라 부호를 직접 준다 */
+.C-19 .prev .g { translate: calc(var(--optical, 1) * -5.9px) 0; }
+.C-19 .next .g { translate: calc(var(--optical, 1) * 5.9px) 0; }
 .C-19 .arm { position: absolute; top: 50%; left: -5px; width: 100%; height: 4px; background: var(--border-strong); }
 .C-19 .arm::after { content: ""; position: absolute; top: 0; height: 100%; background: var(--fg-1); transition: all .15s; }
 .C-19 .top { transform: rotate(45deg); transform-origin: bottom right; }
@@ -8127,8 +8298,8 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 
 ```html
 <div class="C-21">
-  <button type="button" class="w" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <button type="button" class="w" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" class="w" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+  <button type="button" class="w" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
   <button type="button" class="f" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><path class="shaft" d="M16 12H8"/><path class="head" d="M12 16l-4-4 4-4"/></svg></button>
   <button type="button" class="f" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><path class="shaft" d="M8 12h8"/><path class="head" d="M12 8l4 4-4 4"/></svg></button>
 </div>
@@ -8215,8 +8386,8 @@ document.querySelectorAll('[data-behavior~="toggle"]:not([data-toggle-bound])').
 
 ```html
 <div class="C-23">
-  <button type="button" class="nav prev"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></span><span class="pv"><span class="tt"><strong>이전 글</strong>가을 산책 기록</span><span class="th"></span></span></button>
-  <button type="button" class="nav next"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span><span class="pv"><span class="th"></span><span class="tt"><strong>다음 글</strong>겨울 여행 준비</span></span></button>
+  <button type="button" class="nav prev"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></span><span class="pv"><span class="tt"><strong>이전 글</strong>가을 산책 기록</span><span class="th"></span></span></button>
+  <button type="button" class="nav next"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></span><span class="pv"><span class="th"></span><span class="tt"><strong>다음 글</strong>겨울 여행 준비</span></span></button>
 </div>
 ```
 
@@ -8286,8 +8457,8 @@ document.querySelectorAll('[data-behavior~="toggle"]:not([data-toggle-bound])').
 
 ```html
 <div class="C-25">
-  <button type="button" class="nav prev"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></span><span class="pn"><span class="th"></span><span class="cap">이전 프로젝트</span></span></button>
-  <button type="button" class="nav next"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span><span class="pn"><span class="th"></span><span class="cap">다음 프로젝트</span></span></button>
+  <button type="button" class="nav prev"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></span><span class="pn"><span class="th"></span><span class="cap">이전 프로젝트</span></span></button>
+  <button type="button" class="nav next"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></span><span class="pn"><span class="th"></span><span class="cap">다음 프로젝트</span></span></button>
 </div>
 ```
 
@@ -8325,8 +8496,8 @@ document.querySelectorAll('[data-behavior~="toggle"]:not([data-toggle-bound])').
 
 ```html
 <div class="C-26">
-  <button type="button" class="nav prev" aria-label="이전"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></span><span class="th"></span></button>
-  <button type="button" class="nav next" aria-label="다음"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span><span class="th"></span></button>
+  <button type="button" class="nav prev" aria-label="이전"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></span><span class="th"></span></button>
+  <button type="button" class="nav next" aria-label="다음"><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></span><span class="th"></span></button>
 </div>
 ```
 
@@ -8359,8 +8530,8 @@ document.querySelectorAll('[data-behavior~="toggle"]:not([data-toggle-bound])').
 ```html
 <div class="C-27" data-behavior="carousel" data-loop>
   <div class="track" data-track><div class="s">1</div><div class="s">2</div><div class="s">3</div><div class="s">4</div></div>
-  <button type="button" class="bar" data-prev aria-label="이전 슬라이드"><span class="img"></span><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></span></button>
-  <button type="button" class="circ" data-next aria-label="다음 슬라이드"><span class="disc"><span class="img"></span></span><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span></button>
+  <button type="button" class="bar" data-prev aria-label="이전 슬라이드"><span class="img"></span><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></span></button>
+  <button type="button" class="circ" data-next aria-label="다음 슬라이드"><span class="disc"><span class="img"></span></span><span class="iw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></span></button>
 </div>
 ```
 
@@ -8624,6 +8795,8 @@ document.querySelectorAll('[data-behavior~="direction"]:not([data-direction-boun
 .C-32 .v1 { position: relative; display: flex; align-items: center; width: 200px; height: 40px; padding: 0 15px; font: inherit; font-size: var(--text-14); color: var(--bg-1); background: var(--fg-1); border: 0; border-radius: var(--radius-md); cursor: pointer; transition-duration: .2s; }
 .C-32 .v1 .arw { position: absolute; right: 0; display: flex; align-items: center; justify-content: center; width: 30px; height: 100%; font-size: var(--text-18); }
 .C-32 .v1:is(:hover, :focus-visible) { background: var(--fg-2); }
+/* 광학 보정: › 글리프 잉크 폭 ≈ .3em, 1/6 ≈ .05em (18px 에서 약 1px) 오른쪽으로. transform 애니메이션과 겹치지 않게 translate 속성 */
+.C-32 .v1 .arw { translate: calc(var(--optical, 1) * 0.05em) 0; }
 .C-32 .v1:is(:hover, :focus-visible) .arw { animation: C-32-in .6s ease-out both; }
 .C-32 .v1:active { transform: translate(1px, 1px); }
 .C-32 .v2 { display: inline-flex; align-items: center; gap: var(--space-2); padding: 10px 20px; font: inherit; font-size: var(--text-16); color: var(--bg-1); background: var(--fg-3); border: 0; border-radius: 20px; cursor: pointer; transition: background-color 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1); }
@@ -8713,8 +8886,8 @@ document.querySelectorAll('[data-behavior~="direction"]:not([data-direction-boun
 
 ```html
 <div class="C-35" data-behavior="replay">
-  <button type="button" data-replay><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>이전</button>
-  <button type="button" data-replay>다음<svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" data-replay><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg>이전</button>
+  <button type="button" data-replay>다음<svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </div>
 ```
 
@@ -8853,8 +9026,8 @@ document.querySelectorAll('[data-behavior~="sequence"]:not([data-sequence-bound]
 ```html
 <div class="D-01" data-behavior="scroller" data-step="0.85">
   <div class="row" data-scroller tabindex="0" aria-label="칩 목록"><button type="button" class="chip">전체</button><button type="button" class="chip">인기</button><button type="button" class="chip">신규</button><button type="button" class="chip">할인</button><button type="button" class="chip">베스트</button><button type="button" class="chip">추천</button><button type="button" class="chip">기획전</button><button type="button" class="chip">브랜드</button><button type="button" class="chip">리뷰</button><button type="button" class="chip">이벤트</button></div>
-  <button type="button" class="fb fb-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <button type="button" class="fb fb-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" class="fb fb-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+  <button type="button" class="fb fb-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
   <p class="note">이 브라우저는 ::scroll-button 미지원 — Chrome 135+ 에서는 브라우저가 만든 화살표가 보인다.</p>
 </div>
 ```
@@ -8876,7 +9049,11 @@ document.querySelectorAll('[data-behavior~="sequence"]:not([data-sequence-bound]
   .D-01 .row::scroll-button(left) { content: "◄" / "이전"; left: calc(anchor(left) + 4px); }
   .D-01 .row::scroll-button(right) { content: "►" / "다음"; right: calc(anchor(right) + 4px); }
   .D-01 .row::scroll-button(*):hover, .D-01 .row::scroll-button(*):focus-visible { opacity: 1; }
-  .D-01 .row::scroll-button(*):active { translate: 1px 1px; }
+  /* 광학 보정: ◄ ► 삼각형 잉크 폭 ≈ .5em, 1/6 ≈ .08em 만큼 가리키는 쪽으로 (14px 에서 약 1px). :active 는 아래에서 덮어써 같이 쓴다 */
+  .D-01 .row::scroll-button(left) { translate: calc(var(--optical, 1) * -0.08em) 0; }
+  .D-01 .row::scroll-button(right) { translate: calc(var(--optical, 1) * 0.08em) 0; }
+  .D-01 .row::scroll-button(left):active { translate: calc(var(--optical, 1) * -0.08em + 1px) 1px; }
+  .D-01 .row::scroll-button(right):active { translate: calc(var(--optical, 1) * 0.08em + 1px) 1px; }
   .D-01 .row::scroll-button(*):disabled { opacity: .2; cursor: unset; }
   .D-01 .row::scroll-marker-group { display: flex; gap: var(--space-2); justify-content: center; margin-top: 20px; }
   .D-01 .chip::scroll-marker { content: ""; width: 16px; height: 16px; border: 2px solid var(--fg-1); border-radius: 50%; transition: all 0.7s; }
@@ -8958,9 +9135,9 @@ document.querySelectorAll('[data-behavior~="scroller"]:not([data-scroller-bound]
 ```html
 <div class="D-02" data-behavior="scroller">
   <div class="row" data-scroller>
-    <button type="button" class="sa sa-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button type="button" class="sa sa-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
     <button type="button" class="chip">전체</button><button type="button" class="chip">인기</button><button type="button" class="chip">신규</button><button type="button" class="chip">할인</button><button type="button" class="chip">베스트</button><button type="button" class="chip">추천</button><button type="button" class="chip">기획전</button><button type="button" class="chip">브랜드</button><button type="button" class="chip">리뷰</button><button type="button" class="chip">이벤트</button>
-    <button type="button" class="sa sa-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" class="sa sa-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
   </div>
 </div>
 ```
@@ -9343,11 +9520,11 @@ document.querySelectorAll('[data-behavior~="scroller"]:not([data-scroller-bound]
 <div class="D-06">
   <p class="lbl">넘치는 줄</p>
   <div class="rw" data-behavior="scroller"><div class="sc" data-scroller>
-    <button type="button" class="ar ar-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="chip">전체</button><button type="button" class="chip">인기</button><button type="button" class="chip">신규</button><button type="button" class="chip">할인</button><button type="button" class="chip">베스트</button><button type="button" class="chip">추천</button><button type="button" class="chip">기획전</button><button type="button" class="chip">브랜드</button><button type="button" class="chip">리뷰</button><button type="button" class="chip">이벤트</button><button type="button" class="ar ar-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" class="ar ar-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="chip">전체</button><button type="button" class="chip">인기</button><button type="button" class="chip">신규</button><button type="button" class="chip">할인</button><button type="button" class="chip">베스트</button><button type="button" class="chip">추천</button><button type="button" class="chip">기획전</button><button type="button" class="chip">브랜드</button><button type="button" class="chip">리뷰</button><button type="button" class="chip">이벤트</button><button type="button" class="ar ar-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
   </div></div>
   <p class="lbl">넘치지 않는 줄</p>
   <div class="rw" data-behavior="scroller"><div class="sc" data-scroller>
-    <button type="button" class="ar ar-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="chip">전체</button><button type="button" class="chip">인기</button><button type="button" class="chip">신규</button><button type="button" class="ar ar-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" class="ar ar-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="chip">전체</button><button type="button" class="chip">인기</button><button type="button" class="chip">신규</button><button type="button" class="ar ar-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
   </div></div>
 </div>
 ```
@@ -9448,9 +9625,9 @@ document.querySelectorAll('[data-behavior~="scroller"]:not([data-scroller-bound]
 
 ```html
 <div class="D-07" data-behavior="scroller" data-step="0.8">
-  <button type="button" class="sb" data-prev aria-label="이전 탭"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" class="sb" data-prev aria-label="이전 탭"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <div class="tabs" data-scroller role="tablist" aria-label="분석 탭"><button type="button" role="tab" class="tab" aria-selected="true">개요</button><button type="button" role="tab" class="tab" aria-selected="false">분석</button><button type="button" role="tab" class="tab" aria-selected="false">리포트</button><button type="button" role="tab" class="tab" aria-selected="false">고객</button><button type="button" role="tab" class="tab" aria-selected="false">주문</button><button type="button" role="tab" class="tab" aria-selected="false">재고</button><button type="button" role="tab" class="tab" aria-selected="false">정산</button><button type="button" role="tab" class="tab" aria-selected="false">설정</button><button type="button" role="tab" class="tab" aria-selected="false">알림</button><button type="button" role="tab" class="tab" aria-selected="false">도움말</button></div>
-  <button type="button" class="sb" data-next aria-label="다음 탭"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" class="sb" data-next aria-label="다음 탭"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </div>
 ```
 
@@ -9559,6 +9736,9 @@ document.querySelectorAll('[data-behavior~="scroller"]:not([data-scroller-bound]
 .D-08 .chev { width: 8px; height: 8px; border: solid currentColor; border-width: 2px 2px 0 0; }
 .D-08 .pg-l .chev { transform: rotate(-135deg); }
 .D-08 .pg-r .chev { transform: rotate(45deg); }
+/* 광학 보정: 셰브론 가로 폭 ≈ 6px(변 8px × sin45° + 선 두께), 1/6 ≈ 1px 를 가리키는 쪽으로 (translate 는 회전과 별개) */
+.D-08 .pg-l .chev { translate: calc(var(--optical, 1) * -1px) 0; }
+.D-08 .pg-r .chev { translate: calc(var(--optical, 1) * 1px) 0; }
 ```
 
 ```js
@@ -9636,9 +9816,9 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 
 ```html
 <div class="D-09" data-behavior="scroller" data-step="0.8">
-  <button type="button" class="eb eb-l" data-prev aria-label="이전 탭"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" class="eb eb-l" data-prev aria-label="이전 탭"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <div class="tabs" data-scroller role="tablist" aria-label="문서 탭"><button type="button" role="tab" class="tab" aria-selected="true">개요</button><button type="button" role="tab" class="tab" aria-selected="false">분석</button><button type="button" role="tab" class="tab" aria-selected="false">리포트</button><button type="button" role="tab" class="tab" aria-selected="false">고객</button><button type="button" role="tab" class="tab" aria-selected="false">주문</button><button type="button" role="tab" class="tab" aria-selected="false">재고</button><button type="button" role="tab" class="tab" aria-selected="false">정산</button><button type="button" role="tab" class="tab" aria-selected="false">설정</button><button type="button" role="tab" class="tab" aria-selected="false">알림</button><button type="button" role="tab" class="tab" aria-selected="false">도움말</button></div>
-  <button type="button" class="eb eb-r" data-next aria-label="다음 탭"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" class="eb eb-r" data-next aria-label="다음 탭"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </div>
 ```
 
@@ -9731,9 +9911,9 @@ document.querySelectorAll('[data-behavior~="scroller"]:not([data-scroller-bound]
 
 ```html
 <div class="D-10" data-behavior="scroller" data-drag data-step="0.7">
-  <button type="button" class="ctl ctl-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" class="ctl ctl-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <div class="row" data-scroller tabindex="0" aria-label="칩 목록"><button type="button" class="chip">전체</button><button type="button" class="chip">인기</button><button type="button" class="chip">신규</button><button type="button" class="chip">할인</button><button type="button" class="chip">베스트</button><button type="button" class="chip">추천</button><button type="button" class="chip">기획전</button><button type="button" class="chip">브랜드</button><button type="button" class="chip">리뷰</button><button type="button" class="chip">이벤트</button></div>
-  <button type="button" class="ctl ctl-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" class="ctl ctl-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </div>
 ```
 
@@ -9826,9 +10006,9 @@ document.querySelectorAll('[data-behavior~="scroller"]:not([data-scroller-bound]
 
 ```html
 <div class="D-11" data-behavior="scroller" data-step="0.6">
-  <button type="button" class="nav nav-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" class="nav nav-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <div class="row" data-scroller tabindex="0" aria-label="칩 목록"><button type="button" class="chip">전체</button><button type="button" class="chip">인기</button><button type="button" class="chip">신규</button><button type="button" class="chip">할인</button><button type="button" class="chip">베스트</button><button type="button" class="chip">추천</button><button type="button" class="chip">기획전</button><button type="button" class="chip">브랜드</button><button type="button" class="chip">리뷰</button><button type="button" class="chip">이벤트</button></div>
-  <button type="button" class="nav nav-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" class="nav nav-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </div>
 ```
 
@@ -9924,9 +10104,9 @@ document.querySelectorAll('[data-behavior~="scroller"]:not([data-scroller-bound]
 
 ```html
 <div class="D-12" data-behavior="scroller" data-drag data-step="0.8">
-  <div class="wrap wrap-l"><button type="button" class="ico" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button></div>
+  <div class="wrap wrap-l"><button type="button" class="ico" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button></div>
   <ul class="row" data-scroller aria-label="탭 목록"><li><button type="button" class="chip">전체</button></li><li><button type="button" class="chip">인기</button></li><li><button type="button" class="chip">신규</button></li><li><button type="button" class="chip">할인</button></li><li><button type="button" class="chip">베스트</button></li><li><button type="button" class="chip">추천</button></li><li><button type="button" class="chip">기획전</button></li><li><button type="button" class="chip">브랜드</button></li><li><button type="button" class="chip">리뷰</button></li><li><button type="button" class="chip">이벤트</button></li></ul>
-  <div class="wrap wrap-r"><button type="button" class="ico" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
+  <div class="wrap wrap-r"><button type="button" class="ico" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
 </div>
 ```
 
@@ -10024,7 +10204,7 @@ document.querySelectorAll('[data-behavior~="scroller"]:not([data-scroller-bound]
 <div class="D-13" data-behavior="scroller replay" data-drag>
   <div class="row" data-scroller tabindex="0" aria-label="칩 목록"><button type="button" class="chip">전체</button><button type="button" class="chip">인기</button><button type="button" class="chip">신규</button><button type="button" class="chip">할인</button><button type="button" class="chip">베스트</button><button type="button" class="chip">추천</button><button type="button" class="chip">기획전</button><button type="button" class="chip">브랜드</button><button type="button" class="chip">리뷰</button><button type="button" class="chip">이벤트</button></div>
   <button type="button" class="hint" data-replay aria-label="스크롤 힌트 다시 보기">
-    <span class="hand"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6"/><path d="M11 11V4a1.5 1.5 0 0 1 3 0v7"/><path d="M14 11V6a1.5 1.5 0 0 1 3 0v8a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3 14a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg></span><span class="txt">스크롤 가능</span><span class="arw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span>
+    <span class="hand"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6"/><path d="M11 11V4a1.5 1.5 0 0 1 3 0v7"/><path d="M14 11V6a1.5 1.5 0 0 1 3 0v8a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3 14a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg></span><span class="txt">스크롤 가능</span><span class="arw"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></span>
   </button>
 </div>
 ```
@@ -10206,6 +10386,9 @@ document.querySelectorAll('[data-behavior~="replay"]:not([data-replay-bound])').
 .E-01 .arr-r:hover::before { rotate: -40deg; } .E-01 .arr-r:hover::after { rotate: 40deg; }
 .E-01 .arr-r:active::before { rotate: -36deg; } .E-01 .arr-r:active::after { rotate: 36deg; }
 .E-01 .arr:hover:not(:disabled), .E-01 .arr:focus-visible { opacity: 1; }
+/* 광학 보정: 막대 2.6em × sin45° ≈ 가로 폭 1.84em, 1/6 ≈ .31em 를 가리키는 쪽으로 (막대 의사요소만 — 버튼 상자·포커스 링·바운스는 그대로) */
+.E-01 .arr-l::before, .E-01 .arr-l::after { translate: calc(var(--optical, 1) * -.31em) 0; }
+.E-01 .arr-r::before, .E-01 .arr-r::after { translate: calc(var(--optical, 1) * .31em) 0; }
 .E-01 .arr:focus-visible { outline: 2px solid var(--bg-1); outline-offset: -.4em; }
 .E-01 .arr:disabled { opacity: .3; cursor: default; }
 .E-01.is-start .arr-r:not(:hover) { animation: E-01-bounce-right 2s 50 both ease-out; }
@@ -10288,8 +10471,8 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 ```html
 <div class="E-02" data-behavior="carousel">
   <div class="view"><div data-track><div class="slide"><span class="t">제1장</span><span class="ln"></span><span class="ln"></span><span class="ln ln-s"></span></div><div class="slide"><span class="t">제2장</span><span class="ln"></span><span class="ln"></span><span class="ln ln-s"></span></div><div class="slide"><span class="t">제3장</span><span class="ln"></span><span class="ln"></span><span class="ln ln-s"></span></div><div class="slide"><span class="t">제4장</span><span class="ln"></span><span class="ln"></span><span class="ln ln-s"></span></div></div></div>
-  <button type="button" class="edge edge-l" data-prev aria-label="이전 쪽"><span class="arr"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></span></button>
-  <button type="button" class="edge edge-r" data-next aria-label="다음 쪽"><span class="arr"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span></button>
+  <button type="button" class="edge edge-l" data-prev aria-label="이전 쪽"><span class="arr"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></span></button>
+  <button type="button" class="edge edge-r" data-next aria-label="다음 쪽"><span class="arr"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></span></button>
 </div>
 ```
 
@@ -10388,8 +10571,8 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 ```html
 <div class="E-03" data-behavior="carousel">
   <div class="view"><div data-track><div class="slide"><span class="t">제1장</span><span class="ln"></span><span class="ln"></span><span class="ln ln-s"></span></div><div class="slide"><span class="t">제2장</span><span class="ln"></span><span class="ln"></span><span class="ln ln-s"></span></div><div class="slide"><span class="t">제3장</span><span class="ln"></span><span class="ln"></span><span class="ln ln-s"></span></div></div></div>
-  <button type="button" class="edge edge-l" data-prev aria-label="이전 쪽"><span class="arr"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></span></button>
-  <button type="button" class="edge edge-r" data-next aria-label="다음 쪽"><span class="arr"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span></button>
+  <button type="button" class="edge edge-l" data-prev aria-label="이전 쪽"><span class="arr"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></span></button>
+  <button type="button" class="edge edge-r" data-next aria-label="다음 쪽"><span class="arr"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></span></button>
   <div class="scrub" aria-hidden="true"><span class="thumb"></span></div>
 </div>
 ```
@@ -10495,7 +10678,7 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 ```html
 <div class="E-04" data-behavior="book">
   <div class="bk"><div data-sheet><div class="face front">1쪽</div><div class="face back">2쪽</div></div><div data-sheet><div class="face front">3쪽</div><div class="face back">4쪽</div></div><div data-sheet><div class="face front">5쪽</div><div class="face back">6쪽</div></div><div data-sheet><div class="face front">7쪽</div><div class="face back">8쪽</div></div></div>
-  <button type="button" class="pv" data-prev aria-label="이전 쪽"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" class="pv" data-prev aria-label="이전 쪽"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
   <button type="button" class="corner" data-next aria-label="다음 쪽 (오른쪽 아래 모서리)"><span class="fold"></span></button>
 </div>
 ```
@@ -10727,8 +10910,8 @@ document.querySelectorAll('[data-behavior~="book"]:not([data-book-bound])').forE
 ```html
 <div class="E-06" data-behavior="pager" data-total="12">
   <div class="bar" role="toolbar" aria-label="문서 도구 모음">
-    <button type="button" class="tb tb-up" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <button type="button" class="tb tb-down" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" class="tb tb-up" data-prev aria-label="이전 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+    <button type="button" class="tb tb-down" data-next aria-label="다음 페이지"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
     <span class="pn" data-label aria-live="polite"></span>
   </div>
   <div class="doc" aria-hidden="true"><span class="ln"></span><span class="ln"></span><span class="ln ln-s"></span><span class="ln"></span></div>
@@ -10871,8 +11054,8 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
 ```html
 <div class="E-07" data-behavior="carousel">
   <div class="view"><div data-track><div class="slide">사진 1</div><div class="slide">사진 2</div><div class="slide">사진 3</div></div></div>
-  <button type="button" class="pa pa-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <button type="button" class="pa pa-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button type="button" class="pa pa-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+  <button type="button" class="pa pa-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
 </div>
 ```
 
@@ -10969,8 +11152,8 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 ```html
 <div class="E-08" data-behavior="carousel">
   <div class="view"><div data-track><div class="slide">사진 1</div><div class="slide">사진 2</div><div class="slide">사진 3</div></div></div>
-  <button type="button" class="ga ga-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <button type="button" class="ga ga-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" class="ga ga-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+  <button type="button" class="ga ga-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </div>
 ```
 
@@ -11066,8 +11249,8 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 ```html
 <div class="E-09" data-behavior="carousel">
   <div class="view"><div data-track><div class="slide">사진 1</div><div class="slide">사진 2</div><div class="slide">사진 3</div></div></div>
-  <button type="button" class="la la-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <button type="button" class="la la-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" class="la la-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+  <button type="button" class="la la-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </div>
 ```
 
@@ -11166,8 +11349,8 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 ```html
 <div class="E-10" data-behavior="carousel" data-loop>
   <div class="view"><div data-track><div class="slide">사진 1</div><div class="slide">사진 2</div><div class="slide">사진 3</div></div></div>
-  <button type="button" class="fa fa-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <button type="button" class="fa fa-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" class="fa fa-l" data-prev aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+  <button type="button" class="fa fa-r" data-next aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </div>
 ```
 
@@ -11260,8 +11443,8 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
 ```html
 <div class="E-11" data-behavior="carousel" data-step="20">
   <div class="view"><div class="trk" data-track><div class="s"><div class="card">스토리 1</div></div><div class="s"><div class="card">스토리 2</div></div><div class="s"><div class="card">스토리 3</div></div><div class="s"><div class="card">스토리 4</div></div><div class="s"><div class="card">스토리 5</div></div></div></div>
-  <button type="button" class="ar ar-l" data-prev aria-label="이전 스토리"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <button type="button" class="ar ar-r" data-next aria-label="다음 스토리"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button type="button" class="ar ar-l" data-prev aria-label="이전 스토리"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+  <button type="button" class="ar ar-r" data-next aria-label="다음 스토리"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
 </div>
 ```
 
@@ -11363,8 +11546,8 @@ document.querySelectorAll('[data-behavior~="carousel"]:not([data-carousel-bound]
   <div class="hd">
     <span class="mon"><span class="lb" data-label aria-live="polite"></span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
     <span class="nv">
-      <button type="button" data-prev aria-label="이전 달"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <button type="button" data-next aria-label="다음 달"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+      <button type="button" data-prev aria-label="이전 달"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button>
+      <button type="button" data-next aria-label="다음 달"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button>
     </span>
   </div>
   <div class="wk" aria-hidden="true"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
@@ -11519,8 +11702,8 @@ document.querySelectorAll('[data-behavior~="pager"]:not([data-pager-bound])').fo
   <div class="hd">
     <span class="cap" data-label aria-live="polite"></span>
     <span class="nv">
-      <button type="button" data-prev aria-label="이전 달"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6v12l-8-6z" fill="currentColor"/></svg></button>
-      <button type="button" data-next aria-label="다음 달"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6v12l8-6z" fill="currentColor"/></svg></button>
+      <button type="button" data-prev aria-label="이전 달"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-0.33 0)"><path d="M15 6v12l-8-6z" fill="currentColor"/></g></svg></button>
+      <button type="button" data-next aria-label="다음 달"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(0.33 0)"><path d="M9 6v12l8-6z" fill="currentColor"/></g></svg></button>
     </span>
   </div>
   <div class="wk" aria-hidden="true"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
@@ -12147,8 +12330,8 @@ document.querySelectorAll('[data-behavior~="cursor"]:not([data-cursor-bound])').
 
 ```html
 <div class="F-01">
-  <div class="pair"><button type="button" class="l" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="r" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div>
-  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M10.5 8l4 4-4 4"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M10.5 8l4 4-4 4"/></svg></div>
+  <div class="pair"><button type="button" class="l" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1 0)"><path d="M15 18l-6-6 6-6"/></g></svg></button><button type="button" class="r" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1 0)"><path d="M9 18l6-6-6-6"/></g></svg></button></div>
+  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><g class="opt" transform="translate(0.17 0)"><path d="M10.5 8l4 4-4 4"/></g></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><g class="opt" transform="translate(0.17 0)"><path d="M10.5 8l4 4-4 4"/></g></svg></div>
 </div>
 ```
 
@@ -12178,8 +12361,8 @@ document.querySelectorAll('[data-behavior~="cursor"]:not([data-cursor-bound])').
 
 ```html
 <div class="F-02">
-  <div class="pair"><button type="button" class="l" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 20l-8-8 8-8" stroke-width="1.25"/></svg></button><button type="button" class="r" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 20l8-8-8-8" stroke-width="1.25"/></svg></button></div>
-  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4l3.5 8-3.5 8"/></svg></div>
+  <div class="pair"><button type="button" class="l" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-0.33 0)"><path d="M15 20l-8-8 8-8" stroke-width="1.25"/></g></svg></button><button type="button" class="r" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(0.33 0)"><path d="M9 20l8-8-8-8" stroke-width="1.25"/></g></svg></button></div>
+  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(0.83 0)"><path d="M10 4l3.5 8-3.5 8"/></g></svg></div>
 </div>
 ```
 
@@ -12209,8 +12392,8 @@ document.querySelectorAll('[data-behavior~="cursor"]:not([data-cursor-bound])').
 
 ```html
 <div class="F-03">
-  <div class="pair"><button type="button" class="l" aria-label="처음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></svg></button><button type="button" class="r" aria-label="끝"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></svg></button></div>
-  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6v12l7-6z" fill="currentColor"/><path d="M13 6v12l7-6z" fill="currentColor"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 8.5l3.5 3.5L8 15.5"/><path d="M12.5 8.5l3.5 3.5-3.5 3.5"/></svg></div>
+  <div class="pair"><button type="button" class="l" aria-label="처음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-1.14 0)"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></g></svg></button><button type="button" class="r" aria-label="끝"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1.14 0)"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></g></svg></button></div>
+  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(1.07 0)"><path d="M5 6v12l7-6z" fill="currentColor"/><path d="M13 6v12l7-6z" fill="currentColor"/></g></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><g class="opt" transform="translate(0.79 0)"><path d="M8 8.5l3.5 3.5L8 15.5"/><path d="M12.5 8.5l3.5 3.5-3.5 3.5"/></g></svg></div>
 </div>
 ```
 
@@ -12240,8 +12423,8 @@ document.querySelectorAll('[data-behavior~="cursor"]:not([data-cursor-bound])').
 
 ```html
 <div class="F-04">
-  <div class="pair"><button type="button" class="l" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6v12l-8-6z" fill="currentColor"/></svg></button><button type="button" class="r" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6v12l8-6z" fill="currentColor"/></svg></button></div>
-  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6v12l8-6z"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M10 8v8l5.5-4z" fill="currentColor"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 6v12l8-6z" fill="currentColor"/><path d="M18 6v12"/></svg></div>
+  <div class="pair"><button type="button" class="l" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-0.33 0)"><path d="M15 6v12l-8-6z" fill="currentColor"/></g></svg></button><button type="button" class="r" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(0.33 0)"><path d="M9 6v12l8-6z" fill="currentColor"/></g></svg></button></div>
+  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(0.33 0)"><path d="M9 6v12l8-6z"/></g></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><g class="opt" transform="translate(0.17 0)"><path d="M10 8v8l5.5-4z" fill="currentColor"/></g></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 6v12l8-6z" fill="currentColor"/><path d="M18 6v12"/></svg></div>
 </div>
 ```
 
@@ -12366,8 +12549,8 @@ document.querySelectorAll('[data-behavior~="cursor"]:not([data-cursor-bound])').
 
 ```html
 <div class="F-08">
-  <div class="pair"><button type="button" class="l" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 9h-8V5l-8 7 8 7v-4h8z" fill="currentColor"/></svg></button><button type="button" class="r" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h8V5l8 7-8 7v-4H4z" fill="currentColor"/></svg></button></div>
-  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h8V5l8 7-8 7v-4H4z"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 9h4V5l7 7-7 7v-4H9z"/><path d="M4 9v6"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9h8V5l8 7-8 7v-4H2z"/><path d="M22 5v14"/></svg></div>
+  <div class="pair"><button type="button" class="l" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(-0.94 0)"><path d="M20 9h-8V5l-8 7 8 7v-4h8z" fill="currentColor"/></g></svg></button><button type="button" class="r" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(0.94 0)"><path d="M4 9h8V5l8 7-8 7v-4H4z" fill="currentColor"/></g></svg></button></div>
+  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="opt" transform="translate(0.94 0)"><path d="M4 9h8V5l8 7-8 7v-4H4z"/></g></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 9h4V5l7 7-7 7v-4H9z"/><path d="M4 9v6"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9h8V5l8 7-8 7v-4H2z"/><path d="M22 5v14"/></svg></div>
 </div>
 ```
 
@@ -12400,7 +12583,7 @@ document.querySelectorAll('[data-behavior~="cursor"]:not([data-cursor-bound])').
 ```html
 <div class="F-09">
   <div class="pair"><button type="button" class="l" aria-label="이전"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><path class="shaft" d="M16 12H8"/><path class="head" d="M12 16l-4-4 4-4"/></svg></button><button type="button" class="r" aria-label="다음"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><path class="shaft" d="M8 12h8"/><path class="head" d="M12 8l4 4-4 4"/></svg></button></div>
-  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8"/><path d="M12 8l4 4-4 4"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M10.5 8l4 4-4 4"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M10 8v8l5.5-4z" fill="currentColor"/></svg></div>
+  <div class="vars" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8"/><path d="M12 8l4 4-4 4"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><g class="opt" transform="translate(0.17 0)"><path d="M10.5 8l4 4-4 4"/></g></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><g class="opt" transform="translate(0.17 0)"><path d="M10 8v8l5.5-4z" fill="currentColor"/></g></svg></div>
 </div>
 ```
 
