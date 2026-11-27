@@ -1,0 +1,167 @@
+/**
+ * PARAMETA Design System — colors_and_type.css
+ * Slim, semantic layer on top of tokens.css.
+ *
+ * tokens.css is the source of truth for raw values.
+ * This file maps them onto the foreground/background and
+ * h1/h2/p semantic names that designs reference day-to-day.
+ *
+ *   <link rel="stylesheet" href="tokens.css" />
+ *   <link rel="stylesheet" href="colors_and_type.css" />
+ */
+
+@import url('tokens.css');
+
+:root {
+  /* ── FOREGROUNDS ─────────────────────────────────────────── */
+  --fg-1:        var(--para-black);     /* primary text */
+  --fg-2:        var(--gray-600);       /* body text · secondary */
+  --fg-3:        var(--gray-500);       /* captions, meta */
+  --fg-4:        var(--gray-400);       /* placeholders, footer chrome */
+  --fg-accent:   var(--para-violet);    /* CTA · emphasised words · links */
+  --fg-inverse:  #FFFFFF;               /* text on dark / violet surfaces */
+
+  /* ── BACKGROUNDS ─────────────────────────────────────────── */
+  --bg-1:        #FFFFFF;               /* canvas */
+  --bg-2:        var(--gray-50);        /* subtle card / section split */
+  --bg-3:        var(--purple-50);      /* violet-tinted surfaces */
+  --bg-dark:     var(--para-black);     /* full-bleed dark slides */
+  --bg-violet:   var(--para-violet);    /* CTA · cover · featured tile */
+
+  /* ── BORDERS ─────────────────────────────────────────────── */
+  --border-subtle: var(--gray-100);
+  --border:        var(--gray-200);
+  --border-strong: var(--gray-300);
+  --border-violet: rgba(97, 0, 255, 0.18);
+
+  /* ── DISPLAY FONT STACKS (alias of tokens) ───────────────── */
+  --font-display: 'Hanken Grotesk', 'Pretendard', 'Pretendard Variable', 'Noto Sans KR',
+                  -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body:    var(--font-display);
+  --font-mono:    'JetBrains Mono', 'D2 Coding', Menlo, Consolas, monospace;
+
+  /* ── MARKETING TEXT SCALE (px-pinned, in addition to semantic h1~h4) ─ */
+  --text-72: 72px;
+  --text-60: 60px;
+  --text-48: 48px;
+  --text-36: 36px;
+  --text-32: 32px;
+  --text-26: 26px;
+  --text-24: 24px;
+  --text-22: 22px;
+  --text-18: 18px;
+  --text-16: 16px;
+  --text-14: 14px;
+
+  /* ── LINE-HEIGHT SCALE (even px, paired to text scale) ─ */
+  --lh-72: 88px;
+  --lh-60: 68px;
+  --lh-48: 58px;
+  --lh-36: 52px;
+  --lh-32: 40px;
+  --lh-26: 32px;
+  --lh-24: 32px;
+  --lh-22: 32px;
+  --lh-18: 28px;
+  --lh-16: 24px;
+  --lh-14: 20px;
+}
+
+/* ──────────────────────────────────────────────────────────
+ * SEMANTIC TYPOGRAPHY
+ * Use these inside marketing pages, documents, UI surfaces.
+ * Slides use slide-base.css instead (different scale).
+ * ────────────────────────────────────────────────────────── */
+
+body {
+  font-family: var(--font-body);
+  color: var(--fg-1);
+  background: var(--bg-1);
+  font-feature-settings: 'ss06' on;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, .h1 {
+  font-family: var(--font-display);
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing:0;
+  color: var(--fg-1);
+}
+h1 .em, .h1 .em { color: var(--fg-accent); }
+
+h2, .h2 {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing:0;
+  color: var(--fg-1);
+}
+
+h3, .h3 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing:0;
+  color: var(--fg-1);
+}
+
+h4, .h4 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--fg-1);
+}
+
+p, .p {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--fg-2);
+}
+
+.lead {
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--fg-2);
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing:0;
+  text-transform: uppercase;
+  color: var(--fg-accent);
+}
+
+.caption {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--fg-3);
+}
+
+code, .code, kbd, samp {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: var(--bg-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 1px 6px;
+  color: var(--fg-1);
+}
+
+a {
+  color: var(--fg-accent);
+  text-decoration: none;
+  transition: opacity 180ms var(--ease-out);
+}
+a:hover { opacity: 0.72; }

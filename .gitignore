@@ -1,0 +1,5 @@
+.DS_Store
+.superpowers/
+.claude/
+dist/
+node_modules/

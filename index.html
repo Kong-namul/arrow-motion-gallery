@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>화살표·버튼 모션 도감</title>
+<meta name="description" content="캐러셀·페이지네이션·가로 스크롤·페이지 넘김 화살표와 버튼 모션을 출처·수치·코드와 함께 모은 라이브 도감">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/ds/colors_and_type.css?v=1">
+<link rel="stylesheet" href="assets/theme.css?v=2">
+<link rel="stylesheet" href="assets/gallery.css?v=5">
+<script>try { var t = localStorage.getItem('arrow-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+</head>
+<body>
+<header class="g-head g-wrap">
+  <p class="g-eyebrow">Arrow &amp; Button Motion Reference · 2026-11-26</p>
+  <h1 class="g-title">화살표·버튼 모션 도감</h1>
+  <p class="g-lead">캐러셀, 페이지네이션, 가로 스크롤, 페이지 넘김에 쓰는 좌우 화살표와 버튼 모션 <strong data-total-count>0</strong>종, 그리고 버튼 전체를 한 모션 언어로 묶는 세트 4개. 직접 호버하고 눌러본 뒤 <strong>번호로 지시</strong>하면 된다. 예: “B-04처럼”, “모션 세트 S2로 T07”.</p>
+  <p class="g-note">‘느리게’를 켜면 CSS 모션과 데모의 타이머(로딩·홀드 시간)가 0.25배속으로 재생된다. ‘추정’은 출처에 수치가 없어 재현값을 쓴 항목. 카드의 ‘코드 복사’는 HTML·CSS·동작 JS를 한 번에 복사한다.</p>
+</header>
+<nav class="g-bar" aria-label="필터와 도구">
+  <div class="g-wrap g-bar-in">
+    <div class="g-chips" data-filters></div>
+    <div class="g-tools">
+      <input class="g-search" type="search" placeholder="이름·느낌·용도 검색" aria-label="검색" data-search>
+      <button class="g-toggle" type="button" aria-pressed="false" data-slowmo>느리게 0.25×</button>
+      <button class="g-toggle" type="button" aria-pressed="false" data-theme-toggle>다크</button>
+    </div>
+  </div>
+</nav>
+<main class="g-wrap" data-sections>
+  <p class="g-empty" data-empty hidden>검색 결과가 없다.</p>
+</main>
+<footer class="g-foot g-wrap">
+  <p>모든 항목은 실제 출처(라이브러리 CSS·소스, 디자인 시스템 문서, 라이브 사이트 계산값)를 확인해 재현했다. 색은 PARAMETA DS 흑백 토큰으로 통일했고 원래 색은 스펙에 적었다.</p>
+  <p>번호별 스펙: ARROWS.md · 리서치 원문: research/ · 생성: node scripts/build-md.mjs</p>
+</footer>
+<script src="data/core.js?v=2"></script>
+<script src="data/A.js?v=1"></script>
+<script src="data/B.js?v=1"></script>
+<script src="data/C.js?v=1"></script>
+<script src="data/D.js?v=1"></script>
+<script src="data/E.js?v=1"></script>
+<script src="data/F.js?v=1"></script>
+<script src="data/G.js?v=1"></script>
+<script src="data/sets.js?v=4"></script>
+<script src="assets/behaviors.js?v=5"></script>
+<script src="assets/gallery.js?v=2"></script>
+</body>
+</html>
